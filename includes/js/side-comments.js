@@ -649,6 +649,21 @@ Section.prototype.addReplyClick = function( event ) {
 };
 
 /**
+ * Callback for the comment button click event.
+ * @param {Object} event The event object.
+ */
+Section.prototype.addReplyClick = function( event ) {
+  event.preventDefault();
+  if (this.currentUser) {
+    var parentID = event.currentTarget.attributes["data-parent"].value;
+    var commentID = event.currentTarget.attributes["data-comment"].value;
+  	this.showCommentForm(parentID, commentID);
+  } else {
+  	this.eventPipe.emit('addCommentAttempted');//TODO
+  }
+};
+
+/**
  * Show the comment form for this section.
  */
 Section.prototype.showCommentForm = function(parentID, commentID) {
@@ -732,6 +747,7 @@ Section.prototype.postComment = function(parentID, commentID) {
   	authorId: this.currentUser.id,
     parentID: commentID
   };
+  console.log(comment);
   this.eventPipe.emit('commentPosted', comment);
 };
 
