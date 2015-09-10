@@ -108,7 +108,7 @@
                 }
             }
             ul.comments {
-                padding: 0 15px;
+                padding: 0 15px 0 0;
             }
         }
         .comments {
@@ -172,7 +172,11 @@
         }
         ul.comments {
             li {
-                padding: 15px 0 0 0;
+                &.comment-main {
+                    border-left: 1px dashed #dbdbdb;
+                    margin: 0 0 20px 0;
+                    padding: 15px 0 0 15px;
+                }
             }
         }
         .author-avatar {
@@ -200,25 +204,25 @@
             }
         }
         .comentario-fill {
-            float: left;
-            width: 80%;
-            margin-left: 5px;
-            padding-bottom: 10px;
-            border-bottom: 1px solid #cccccc;
+            //float: left;
+            width: 100%;
+            //margin-left: 5px;
+            padding-bottom: 15px;
+            border-bottom: 1px dashed #dbdbdb;
         }
         .right-of-avatar {
             float: left;
             width: 158px;
         }
         .author-name {
-            line-height: 16px;
-            margin: 0 0 2px 0;
+            font-size: 15px;
+            margin: 0;
             font-weight: 700;
             text-decoration: none;
             color: #222222;
         }
         .comment-time {
-            font-size: 11px;
+            font-size: 10px;
             color: #686868;
         }
         a.author-name:hover {
@@ -366,7 +370,6 @@
         position: absolute;
         color: #999999;
     }
-    .side-comment ul.comments li:first-child,
     .side-comment .comment-form:first-child,
     .side-comment .comment-form:last-child {
         border: none;
