@@ -134,7 +134,7 @@
             $data['voting_nonce'] = wp_create_nonce( 'side_comments_voting_nonce' );
 
             //create a nonce gor last comments
-            $data['last_comments_nonce'] = wp_create_nonce( 'side_comments_last_comments_nonce' );
+			//$data['last_comments_nonce'] = wp_create_nonce('side_comments_last_comments_nonce');
 
             // We also need the admin url as we need to send an AJAX request to it
 			// ToDo: fix this, as we need this to not be https for it to work atm
@@ -1020,8 +1020,7 @@
 
         public function last_comments_callback()
         {
-            //TODO: implement nonce
-//            check_ajax_referer('side_comments_last_comments_nonce', 'last_comments_nonce');
+            check_ajax_referer('side_comments_last_comments_nonce', 'last_comments_nonce');
 
             $postID = isset($_POST['post_id']) ? absint($_POST['post_id']) : false;
 
