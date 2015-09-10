@@ -1023,13 +1023,17 @@
             //TODO: implement nonce
 //            check_ajax_referer('side_comments_last_comments_nonce', 'last_comments_nonce');
 
-            $postID = absint($_POST['post_id']);
+            $postID = isset($_POST['post_id']) ? absint($_POST['post_id']) : false;
+
+            if (!$postID) {
+                wp_send_json_error(array('error_message' => 'Nenhum post_id informado'));
+            }
 
             $result = $this->listLastComments($postID);
             if ($result) {
                 wp_send_json_success($result);
-            }else{
-                wp_send_json_error(array('error_message'=>'Nenhum comentário encontrado'));
+            } else {
+                wp_send_json_error(array('error_message' => 'Nenhum comentário encontrado'));
             }
         }
 
