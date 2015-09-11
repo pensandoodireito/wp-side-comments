@@ -8,6 +8,7 @@ jQuery(document).ready(function($) {
 	var userData 			= commentsData.user;
 
 	var nonce 				= commentsData.nonce;
+    var voting_nonce        = commentsData.voting_nonce;
 	var postID 				= commentsData.postID;
 	var ajaxURL 			= commentsData.ajaxURL;
 	var containerSelector 	= commentsData.containerSelector;
@@ -207,11 +208,11 @@ jQuery(document).ready(function($) {
 		if (false === voteButtonClicked) {
 			voteButtonClicked = true;
 			var post = $.post(
-				commentsData.ajaxURL, {
+				ajaxURL, {
 					action: 'comment_vote_callback',
 					vote: value,
 					comment_id: comment_id,
-					vote_nonce: commentsData.voting_nonce
+					vote_nonce: voting_nonce
 				}
 			);
 
@@ -238,7 +239,22 @@ jQuery(document).ready(function($) {
             name: user.display_name
         };
 
-        sideComments.setCurrentUser(userData);
+        var post = $.post(
+            ajaxURL, {
+                action: 'refresh_nonce_callback'
+            }
+        );
+
+        post.done(function (response) {
+            if (response.success === false) {
+                console.log(response.data.error_message);
+            } else {
+                nonce = response.data.nonce;
+                voting_nonce = response.data.voting_nonce;
+                sideComments.setCurrentUser(userData);
+            }
+        });
+
     });
 
 });
