@@ -54,7 +54,7 @@ jQuery(document).ready(function ($) {
 
     // We need to listen for the post and delete events and post an AJAX response back to PHP
     sideComments.on('commentPosted', function (comment) {
-        var el = this;
+        var parent = $('.comment-form.active');
 
         $.ajax({
             url: ajaxURL,
@@ -73,10 +73,11 @@ jQuery(document).ready(function ($) {
             success: function (response) {
 
                 if (response.success === false) {
-                    var erro = $('.hidden > .alert-danger');
+                    var erro = $('.hidden > .alert-danger').clone();
                     erro.find('p').html(response.data.error_message);
-
-                    $('.comment-form.active').append(erro.clone());
+                    erro.hide().appendTo(parent).fadeIn(1000).delay(5000).slideUp(1000, function () {
+                        $(this).remove();
+                    });
                 } else {
                     newCommentID = response.data.newCommentID;
                     comment.id = response.data.newCommentID;
@@ -93,10 +94,11 @@ jQuery(document).ready(function ($) {
                 }
             },
             error: function (jqXHR, textStatus, errorThrown) {
-                var erro = $('.hidden > .alert-danger');
+                var erro = $('.hidden > .alert-danger').clone();
                 erro.find('p').html("Falha ao adicionar o comentário. Tente novamente mais tarde");
-
-                $('.comment-form.active').append(erro.clone());
+                erro.hide().appendTo(parent).fadeIn(1000).delay(5000).slideUp(1000, function () {
+                    $(this).remove();
+                });
             }
         });
 
@@ -194,7 +196,7 @@ jQuery(document).ready(function ($) {
     // catch the upvote/downvote action
     $('div.commentable-container').on('click', 'a.vote-btn', function (e) {
         e.preventDefault();
-        var el = this;
+        var parent = $(this).parents('.comment-weight-container');
         var value = 0;
         var comment_id = $(this).data('commentId');
         if ($(this).hasClass('vote-up')) {
@@ -216,16 +218,20 @@ jQuery(document).ready(function ($) {
 
             post.done(function (response) {
                 if (response.success === false) {
-                    var erro = $('.hidden > .alert-danger');
+                    var erro = $('.hidden > .alert-danger').clone();
                     erro.find('p').html(response.data.error_message);
-                    $(el).parents('.comment-weight-container').append(erro.clone());
+                    erro.hide().appendTo(parent).fadeIn(1000).delay(5000).slideUp(1000, function () {
+                        $(this).remove();
+                    });
                 } else {
                     $('#comment-weight-value-' + comment_id).text(response.data.weight);
                     $('#comment-' + value + '-value-' + comment_id).text(response.data.full_karma);
 
-                    var sucesso = $('.hidden > .alert-success');
+                    var sucesso = $('.hidden > .alert-success').clone();
                     sucesso.find('p').html(response.data.success_message);
-                    $(el).parents('.comment-weight-container').append(sucesso.clone());
+                    sucesso.hide().appendTo(parent).fadeIn(1000).delay(5000).slideUp(1000, function () {
+                        $(this).remove();
+                    });
                 }
 
                 voteButtonClicked = false;
