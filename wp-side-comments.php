@@ -92,54 +92,52 @@
 		 * @return null
 		 */
 
-		public function wp_enqueue_scripts__loadScriptsAndStyles()
-		{
+        public function wp_enqueue_scripts__loadScriptsAndStyles()
+        {
 
-			// Ensure we're on a post where we want to load our scripts/styles
-			$validScreen = $this->weAreOnAValidScreen();
+            // Ensure we're on a post where we want to load our scripts/styles
+            $validScreen = $this->weAreOnAValidScreen();
 
-			if( !$validScreen ){
-				return;
-			}
+            if (!$validScreen) {
+                return;
+            }
 
-			wp_register_style( 'side-comments-style', CTLT_WP_SIDE_COMMENTS_PLUGIN_URL . 'includes/css/side-comments-full.css' );
-			wp_register_script( 'side-comments-script', CTLT_WP_SIDE_COMMENTS_PLUGIN_URL . 'includes/js/side-comments.js', array ( 'jquery' ) );
-			wp_register_script( 'wp-side-comments-script', CTLT_WP_SIDE_COMMENTS_PLUGIN_URL . 'includes/js/wp-side-comments.js', array ( 'jquery', 'side-comments-script' ), null, true );
-			wp_register_style( 'texto-em-debate-style', CTLT_WP_SIDE_COMMENTS_PLUGIN_URL . 'includes/css/texto-em-debate.css');
+            wp_register_style('side-comments-style', CTLT_WP_SIDE_COMMENTS_PLUGIN_URL . 'includes/css/side-comments-full.css');
+            wp_register_style('texto-em-debate-style', CTLT_WP_SIDE_COMMENTS_PLUGIN_URL . 'includes/css/texto-em-debate.css');
 
-			wp_register_script('side-comments-script', CTLT_WP_SIDE_COMMENTS_PLUGIN_URL . 'includes/js/side-comments.js', array('jquery'));
-			wp_register_script('wp-side-comments-script', CTLT_WP_SIDE_COMMENTS_PLUGIN_URL . 'includes/js/wp-side-comments.js', array('jquery', 'side-comments-script'), null, true);
-			wp_register_script('texto-em-debate-script', CTLT_WP_SIDE_COMMENTS_PLUGIN_URL . 'includes/js/texto-em-debate.js', array('jquery'), null, true);
-			wp_register_script('highlight-script', CTLT_WP_SIDE_COMMENTS_PLUGIN_URL . 'includes/js/jquery.highlight-5.js', array('jquery'));
+            wp_register_script('side-comments-script', CTLT_WP_SIDE_COMMENTS_PLUGIN_URL . 'includes/js/side-comments.js', array('jquery'));
+            wp_register_script('wp-side-comments-script', CTLT_WP_SIDE_COMMENTS_PLUGIN_URL . 'includes/js/wp-side-comments.js', array('jquery', 'side-comments-script'), null, true);
+            wp_register_script('highlight-script', CTLT_WP_SIDE_COMMENTS_PLUGIN_URL . 'includes/js/jquery.highlight-5.js', array('jquery'));
+            wp_register_script('texto-em-debate-script', CTLT_WP_SIDE_COMMENTS_PLUGIN_URL . 'includes/js/texto-em-debate.js', array('jquery', 'highlight-script'), null, true);
 
-			wp_enqueue_style('side-comments-style');
-			wp_enqueue_style('texto-em-debate-style');
+            wp_enqueue_style('side-comments-style');
+            wp_enqueue_style('texto-em-debate-style');
 
-			wp_enqueue_script('side-comments-script');
-			wp_enqueue_script('wp-side-comments-script');
-			wp_enqueue_script('texto-em-debate-script');
-			wp_enqueue_script('highlight-script');
+            wp_enqueue_script('side-comments-script');
+            wp_enqueue_script('wp-side-comments-script');
+            wp_enqueue_script('highlight-script');
+            wp_enqueue_script('texto-em-debate-script');
 
-			// Need to get some data for our JS, which we pass to it via localization
-			$data = $this->getCommentsData();
+            // Need to get some data for our JS, which we pass to it via localization
+            $data = $this->getCommentsData();
 
-			// ENsure we have a nonce for AJAX purposes
-			$data['nonce'] = wp_create_nonce( 'side_comments_nonce' );
+            // ENsure we have a nonce for AJAX purposes
+            $data['nonce'] = wp_create_nonce('side_comments_nonce');
 
             //create a nonce for Comment Voting
-            $data['voting_nonce'] = wp_create_nonce( 'side_comments_voting_nonce' );
+            $data['voting_nonce'] = wp_create_nonce('side_comments_voting_nonce');
 
             // We also need the admin url as we need to send an AJAX request to it
-			// ToDo: fix this, as we need this to not be https for it to work atm
-			$adminAjaxURL = admin_url( 'admin-ajax.php' );
-			$nonHTTPS = preg_replace( '/^https(?=:\/\/)/i', 'http', $adminAjaxURL );
-			$data['ajaxURL'] = $nonHTTPS;
+            // ToDo: fix this, as we need this to not be https for it to work atm
+            $adminAjaxURL = admin_url('admin-ajax.php');
+            $nonHTTPS = preg_replace('/^https(?=:\/\/)/i', 'http', $adminAjaxURL);
+            $data['ajaxURL'] = $nonHTTPS;
 
-			$data['containerSelector'] = apply_filters( 'wp_side_comments_container_css_selector', '.commentable-container' );
+            $data['containerSelector'] = apply_filters('wp_side_comments_container_css_selector', '.commentable-container');
 
-			wp_localize_script( 'wp-side-comments-script', 'commentsData', $data );
+            wp_localize_script('wp-side-comments-script', 'commentsData', $data);
 
-		}/* wp_enqueue_scripts__loadScriptsAndStyles() */
+        }/* wp_enqueue_scripts__loadScriptsAndStyles() */
 
 
 		/**
