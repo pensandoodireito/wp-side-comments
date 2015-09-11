@@ -232,4 +232,13 @@ jQuery(document).ready(function($) {
 		}
 	});
 
+    $('body').on('user_logged_in', function (e, user) {
+        var userData = {
+            id: user.ID,
+            name: user.display_name
+        };
+
+        sideComments.setCurrentUser(userData);
+    });
+
 });
