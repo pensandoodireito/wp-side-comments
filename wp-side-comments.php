@@ -1,4 +1,4 @@
-<?php 
+<?php
 
 	/*
 	Plugin Name: WP Side Comments
@@ -78,7 +78,11 @@
             add_action('wp_ajax_comment_vote_callback', array($this, 'comment_vote_callback'));
             add_action('wp_ajax_nopriv_comment_vote_callback', array($this, 'comment_vote_callback'));
 
-			// Get the proper template for post type texto-em-debate
+            //Set up AJAX handlers for list last comments per section
+            add_action('wp_ajax_last_comments_callback', array($this, 'last_comments_callback'));
+            add_action('wp_ajax_nopriv_last_comments_callback', array($this, 'last_comments_callback'));
+
+            // Get the proper template for post type texto-em-debate
 			add_filter( 'single_template', array($this,'get_texto_em_debate_template'));
 		}/* __construct() */
 
@@ -126,6 +130,9 @@
 
             //create a nonce for Comment Voting
             $data['voting_nonce'] = wp_create_nonce('side_comments_voting_nonce');
+
+            //create a nonce gor last comments
+			//$data['last_comments_nonce'] = wp_create_nonce('side_comments_last_comments_nonce');
 
             // We also need the admin url as we need to send an AJAX request to it
             // ToDo: fix this, as we need this to not be https for it to work atm
@@ -366,7 +373,7 @@
 
 			foreach( $comments as $key => $commentData )
 			{
-			
+
 				$thisCommentID = $commentData->comment_ID;
 
 				$section = get_comment_meta( $thisCommentID, 'side-comment-section', true );
@@ -409,7 +416,7 @@
 			}
 
 			return $sideCommentData;
- 
+
 		}/* getPostCommentData() */
 
 
@@ -612,13 +619,13 @@
 
 				$result = json_encode( $result );
 				echo $result;
-			
+
 			}
 			else
 			{
 
 				header( 'Location: ' . $_SERVER['HTTP_REFERER'] );
-			
+
 			}
 
 			die();
@@ -699,13 +706,13 @@
 
 				$result = json_encode( $result );
 				echo $result;
-			
+
 			}
 			else
 			{
 
 				header( 'Location: ' . $_SERVER['HTTP_REFERER'] );
-			
+
 			}
 
 			die();
@@ -725,7 +732,7 @@
 		private function weAreOnAValidScreen()
 		{
 
-			// We don't have anything for the admin at the moment and comments are only on a single 
+			// We don't have anything for the admin at the moment and comments are only on a single
 			if( is_admin() || !is_singular() ){
 				return false;
 			}
@@ -786,7 +793,7 @@
 			$defaultPostTypes = array();
 
 			$postTypesToAdjustCommentsFor = apply_filters( 'wp_side_comments_get_comments_number_post_types', $defaultPostTypes, $post_id );
-			
+
 			$thisPostsType = get_post_type( $post_id );
 
 			if( !in_array( $thisPostsType, array_values( $postTypesToAdjustCommentsFor ) ) ){
@@ -816,7 +823,7 @@
 				}
 			}
 
-			return $linearComments;	
+			return $linearComments;
 
 		}/* get_comments_number__adjustCommentsNumberToRemoveSidecomments() */
 
@@ -1008,6 +1015,135 @@
 
             return $value;
         }
+
+        public function last_comments_callback()
+        {
+            check_ajax_referer('side_comments_last_comments_nonce', 'last_comments_nonce');
+
+            $postID = isset($_POST['post_id']) ? absint($_POST['post_id']) : false;
+
+            if (!$postID) {
+                wp_send_json_error(array('error_message' => 'Nenhum post_id informado'));
+            }
+
+            $result = $this->listLastComments($postID);
+            if ($result) {
+                wp_send_json_success($result);
+            } else {
+                wp_send_json_error(array('error_message' => 'Nenhum comentário encontrado'));
+            }
+        }
+
+        private function listLastComments($postID)
+        {
+            $blocks = array();
+
+            $sectionIDs = $this->findLastCommentedSections($postID);
+            if ($sectionIDs) {
+                $comments = $this->findLastComments($postID, $sectionIDs);
+                $postSections = $this->getPostSections($postID, $sectionIDs);
+
+                foreach ($sectionIDs as $sectionID) {
+                    $block = $this->createLastCommentsBlock($sectionID, $comments[$sectionID], $postSections[$sectionID]);
+                    if ($block) {
+                        $blocks[] = $block;
+                    }
+                }
+            }
+            return $blocks;
+        }
+
+        private function createLastCommentsBlock($sectionID, $comments, $postSection)
+        {
+            $block = array(
+                'section_id' => $sectionID,
+                'section_text' => $postSection,
+                'comments' => array()
+            );
+
+            foreach ($comments as $comment) {
+                $block['comments'][] = $this->parseComment($comment);
+            }
+
+            return $block;
+        }
+
+        private function parseComment($comment){
+            return array(
+                'author' => $comment->comment_author,
+                'comment_text' => $comment->comment_content,
+                'date' => $this->getFriendlyCommentTime($comment)
+            );
+        }
+
+        private function getPostSections($postID, array $sections)
+        {
+            $postSections = array();
+            $post = get_post($postID);
+
+            if (!$post){
+                return false;
+            }
+
+            $dom = new DOMDocument();
+            libxml_use_internal_errors(true); //evita warnings devido a má formação do HTML
+            $dom->loadHTML($post->post_content, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
+            $elements = $dom->getElementsByTagName('p');
+
+            foreach ($elements as $key => $element) {
+                $sectionID = $element->hasAttribute('data-section-id') ? $element->getAttribute('data-section-id') : false;
+                if ($sectionID && in_array($sectionID, $sections)) {
+                    $postSections[$sectionID] = $element->nodeValue;
+                }
+
+            }
+
+            return $postSections;
+        }
+
+        private function findLastComments($postID, array $sections, $commentsPerSection = 3)
+        {
+            $args = array(
+                'post_id' => $postID,
+                'meta_key' => 'side-comment-section',
+                'number' => $commentsPerSection
+            );
+
+            $comments = array();
+
+            foreach ($sections as $sectionID) {
+                $args['meta_value'] = $sectionID;
+                $comments[$sectionID] = get_comments($args);
+            }
+
+            return $comments;
+        }
+
+		private function findLastCommentedSections($postID, $numberOfSections = 3)
+        {
+            $args = array(
+                'post_id' => $postID,
+                'meta_key' => 'side-comment-section',
+                'number' => 1
+            );
+            $sections = array();
+
+            for (; $numberOfSections > 0; $numberOfSections--) {
+                if ($sections) {
+                    $args['meta_query'] = $qryArgs = array(
+                        'key' => 'side-comment-section',
+                        'value' => $sections,
+                        'compare' => 'NOT IN'
+                    );
+                }
+
+                $comments = get_comments($args);
+                if ($comments)
+                    $sections[] = $comments[0]->meta_value;
+            }
+
+            return $sections;
+        }
     }/* class CTLT_WP_Side_Comments */
 
 function wp_side_comments_init()
@@ -1045,17 +1181,17 @@ add_action('plugins_loaded', 'wp_side_comments_init');
 
 		function start_lvl( &$output, $depth = 0, $args = array() )
 		{
-			
+
 			$GLOBALS['comment_depth'] = $depth + 1;
-  
+
 			switch ( $args['style'] ) {
 				case 'div':
 				break;
-			
+
 				case 'ol':
 					$output .= '<ol class="children">' . "\n";
 				break;
-			
+
 				case 'ul':
 				default:
 					$output .= '<ul class="children">' . "\n";
@@ -1064,22 +1200,22 @@ add_action('plugins_loaded', 'wp_side_comments_init');
 
 		}/* start_lvl() */
 
-		/** END_LVL 
+		/** END_LVL
 		 * Ends the children list of after the elements are added. */
 		function end_lvl( &$output, $depth = 0, $args = array() )
 		{
-		
+
 			$GLOBALS['comment_depth'] = $depth + 1;
 
 			switch ( $args['style'] ) {
-				
+
 				case 'div':
 				break;
 
 				case 'ol':
 					$output .= "</ol><!-- .children -->\n";
 				break;
-			
+
 				case 'ul':
 				default:
 					$output .= "</ul><!-- .children -->\n";
