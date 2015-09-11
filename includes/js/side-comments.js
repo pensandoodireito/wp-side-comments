@@ -419,10 +419,7 @@ SideComments.prototype.initialize = function (existingComments) {
     var sectionId = $section.data('section-id').toString();
     var sectionComments = _.find(this.existingComments, {sectionId: sectionId});
 
-    //evita que o bloco de comentários seja exibido para blocos que não tem comentários e não estão logados.
-    if (sectionComments || this.currentUser) {
       this.sections.push(new Section(this.eventPipe, $section, this.currentUser, sectionComments));
-    }
 
   }, this);
 };
@@ -556,8 +553,9 @@ SideComments.prototype.initialize = function (existingComments) {
     SideComments.prototype.setCurrentUser = function (currentUser) {
         this.hideComments();
         this.currentUser = currentUser;
+        var instance = this;
         _.each(this.sections, function (section) {
-            section.currentUser = this.currentUser;
+            section.currentUser = instance.currentUser;
             section.render();
         });
     };
@@ -837,6 +835,7 @@ require.register("side-comments/js/section.js", function (exports, require, modu
             this.deselect();
             this.eventPipe.emit('sectionDeselected', this);
         } else {
+            this.$el.addClass('active');
             this.$el.find('.side-comment').addClass('active');
 
             if (this.comments.length === 0 && this.currentUser) {
@@ -3382,6 +3381,8 @@ require.register("side-comments/templates/section.html", function (exports, requ
                 '<a href="#" class="action-link cancel btn btn-default" data-parent="0" data-comment="">Cancelar</a>\n ' +
             '</div>\n ' +
         '</div>\n ' +
+        '<% } else { %>' +
+        '<div> Faça login para poder comentar </div>' +
         '<% } %>' +
     '</div>\n' +
 '</div>'
@@ -3417,7 +3418,6 @@ require.register("side-comments/templates/comment.html", function (exports, requ
 
     '<% if (currentUser){ %>\n     ' +
 
-
     '<div class="comment-form clearfix" data-parent="<%= comment.parentID%>" data-comment="<%= comment.commentID %>">\n ' +
         '<div class="comentario-fill">\n  ' +
             '<p class="author-name">\n <%= currentUser.name %>\n </p>\n ' +
@@ -3449,9 +3449,7 @@ require.register("side-comments/templates/comment.html", function (exports, requ
         '</div>\n ' +
     '</div>\n ' +
     '<% } %>' +
-    
-'</li>'
-        ;
+'</li>';
 });
 
 
