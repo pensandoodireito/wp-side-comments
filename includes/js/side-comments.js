@@ -3404,8 +3404,8 @@ require.register("side-comments/templates/comment.html", function (exports, requ
                 //'<span id="comment-weight-value-<%= comment.commentID %>"><%= comment.karma %></span>\n ' +
 
                 '<div class="mt-xs">\n' +
-                    '<a data-comment-id="<%= comment.commentID %>" class="vote-up btn btn-default btn-xs fontsize-sm text-green" href="#"><i class="fa fa-thumbs-o-up"></i> Concordo <span id="comment-upvote-value-<%= comment.commentID %>"><%= comment.upvotes %></span></a> \n ' +
-                    '<a data-comment-id="<%= comment.commentID %>" class="vote-down btn btn-default btn-xs fontsize-sm red" href="#"><i class="fa fa-thumbs-o-down"></i> Discordo <span id="comment-downvote-value-<%= comment.commentID %>"><%= comment.downvotes %></span></a>\n ' +        
+                    '<a data-comment-id="<%= comment.commentID %>" class="vote-up vote-btn btn btn-default btn-xs fontsize-sm text-green" href="#"><i class="fa fa-thumbs-o-up"></i> Concordo <span id="comment-upvote-value-<%= comment.commentID %>"><%= comment.upvotes %></span></a> \n ' +
+                    '<a data-comment-id="<%= comment.commentID %>" class="vote-down vote-btn btn btn-default btn-xs fontsize-sm red" href="#"><i class="fa fa-thumbs-o-down"></i> Discordo <span id="comment-downvote-value-<%= comment.commentID %>"><%= comment.downvotes %></span></a>\n ' +
                 '</div>\n ' +
                 '<% if (currentUser){ %>\n ' +
                 '<div class="mt-xs">\n' +
@@ -3421,25 +3421,6 @@ require.register("side-comments/templates/comment.html", function (exports, requ
     '<div class="comment-form clearfix" data-parent="<%= comment.parentID%>" data-comment="<%= comment.commentID %>">\n ' +
         '<div class="comentario-fill">\n  ' +
             '<p class="author-name">\n <%= currentUser.name %>\n </p>\n ' +
-
-                // mensagens de erro, aviso, alerta etc...
-                '<div class="alert alert-success mt-xs mb-xs pt-xs pb-xs fontsize-sm" role="alert">\n ' +
-                    '<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>\n ' +
-                    '<p>Texto de <a href="#" class="alert-link">Sucesso</a></p>\n ' +
-                '</div>\n ' +
-                '<div class="alert alert-info mt-xs mb-xs pt-xs pb-xs fontsize-sm" role="alert">\n ' +
-                    '<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>\n ' +
-                    '<p>Texto de <a href="#" class="alert-link">Info</a></p>\n ' +
-                '</div>\n ' +
-                '<div class="alert alert-warning mt-xs mb-xs pt-xs pb-xs fontsize-sm" role="alert">\n ' +
-                    '<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>\n ' +
-                    '<p>Texto de <a href="#" class="alert-link">Aviso</a></p>\n ' +
-                '</div>\n ' +
-                '<div class="alert alert-danger mt-xs mb-xs pt-xs pb-xs fontsize-sm" role="alert">\n ' +
-                    '<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>\n ' +
-                    '<p>Texto de <a href="#" class="alert-link">Erro</a></p>\n ' +
-                '</div>\n ' +
-
             '<div class="comment-box" contenteditable="true" data-parent="<%= comment.parentID%>" data-comment="<%= comment.commentID %>" data-placeholder-content="Responder">' +
             '</div>\n ' +
             '<div class="actions">\n ' +
