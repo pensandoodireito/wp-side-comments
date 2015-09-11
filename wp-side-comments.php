@@ -78,6 +78,11 @@
             add_action('wp_ajax_comment_vote_callback', array($this, 'comment_vote_callback'));
             add_action('wp_ajax_nopriv_comment_vote_callback', array($this, 'comment_vote_callback'));
 
+			//Set up Ajax handlers for refresh nonces
+			add_action('wp_ajax_refresh_nonce_callback', array($this, 'refresh_nonce_callback'));
+			add_action('wp_ajax_nopriv_refresh_nonce_callback', array($this, 'wp_ajax_nopriv_side_comment__handler'));
+
+			// Get the proper template for post type texto-em-debate
             //Set up AJAX handlers for list last comments per section
             add_action('wp_ajax_last_comments_callback', array($this, 'last_comments_callback'));
             add_action('wp_ajax_nopriv_last_comments_callback', array($this, 'last_comments_callback'));
@@ -1015,6 +1020,14 @@
 
             return $value;
         }
+
+		public function refresh_nonce_callback()
+		{
+			$data['nonce'] = wp_create_nonce('side_comments_nonce');
+			$data['voting_nonce'] = wp_create_nonce('side_comments_voting_nonce');
+			wp_send_json_success($data);
+		}
+
 
         public function last_comments_callback()
         {
