@@ -174,8 +174,9 @@ jQuery(document).ready(function ($) {
 
     //When clicked browser scrolls to top of item
     $(".marker").click(function () {
+		var previousSelectedHeight = $(".commentable-section.active").outerHeight()
         $('html, body').animate({
-            scrollTop: $(this).parent().offset().top
+            scrollTop: $(this).parent().offset().top - $('.menu-topo-mc').outerHeight() - previousSelectedHeight
         }, 500);
     });
 
