@@ -604,7 +604,6 @@ require.register("side-comments/js/section.js", function (exports, require, modu
         this.id = $el.data('section-id');
 
         this.$el.on(this.clickEventName, '.side-comment .marker', _.bind(this.markerClick, this));
-        this.$el.on(this.clickEventName, _.bind(this.markerClick, this));
         this.$el.on(this.clickEventName, '.side-comment .add-comment', _.bind(this.addCommentClick, this));
         this.$el.on(this.clickEventName, '.side-comment .add-reply', _.bind(this.addReplyClick, this));
         this.$el.on(this.clickEventName, '.side-comment .post', _.bind(this.postCommentClick, this));
@@ -852,6 +851,7 @@ require.register("side-comments/js/section.js", function (exports, require, modu
      */
     Section.prototype.deselect = function () {
         this.$el.find('.side-comment').removeClass('active');
+        this.$el.removeClass('active');
         this.hideCommentForm();
     };
 
