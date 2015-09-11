@@ -836,6 +836,7 @@ require.register("side-comments/js/section.js", function (exports, require, modu
             this.deselect();
             this.eventPipe.emit('sectionDeselected', this);
         } else {
+            this.$el.addClass('active');
             this.$el.find('.side-comment').addClass('active');
 
             if (this.comments.length === 0 && this.currentUser) {
