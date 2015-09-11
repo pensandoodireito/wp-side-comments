@@ -750,7 +750,7 @@ require.register("side-comments/js/section.js", function (exports, require, modu
         var comment = {
             sectionId: this.id,
             comment: commentBody,
-            authorAvatarUrl: this.currentUser.avatarUrl,
+            //authorAvatarUrl: this.currentUser.avatarUrl,
             authorName: this.currentUser.name,
             authorId: this.currentUser.id,
             parentID: commentID
@@ -3374,9 +3374,6 @@ require.register("side-comments/templates/section.html", function (exports, requ
         '<a href="#" class="add-comment mt-sm btn btn-success btn-md" data-parent="0" data-comment="">Deixe seu comentário</a>\n \n '+
         
         '<div class="comment-form" data-parent="0" data-comment="">\n '+
-            '<div class="author-avatar">\n ' +
-                '<img src="<%= currentUser.avatarUrl %>">\n '+
-            '</div>\n ' +
             '<p class="author-name">\n <%= currentUser.name %>\n        </p>\n ' +
             '<div class="comment-box" contenteditable="true" data-placeholder-content="Deixe seu comentário">' +
             '</div>\n ' +
@@ -3393,11 +3390,8 @@ require.register("side-comments/templates/section.html", function (exports, requ
 
 require.register("side-comments/templates/comment.html", function (exports, require, module) {
     module.exports = 
-'<li class="clearfix" data-comment-id="<%= comment.commentID %>" data-parent-id="<%= comment.parentID%>">\n  ' +
+'<li class="clearfix comment-main" data-comment-id="<%= comment.commentID %>" data-parent-id="<%= comment.parentID%>">\n  ' +
     '<div class="clearfix">\n ' +
-        '<div class="author-avatar">\n ' +
-                '<img src="<%= comment.authorAvatarUrl %>">\n ' +
-        '</div>\n  ' +
         '<div class="comentario-fill">\n  ' +
             '<h6 class="author-name">\n<%= comment.authorName %>\n</h6>\n ' +
             '<p class="comment-time">\n    <%= comment.time %>\n  </p>\n ' +
@@ -3425,9 +3419,6 @@ require.register("side-comments/templates/comment.html", function (exports, requ
 
 
     '<div class="comment-form clearfix" data-parent="<%= comment.parentID%>" data-comment="<%= comment.commentID %>">\n ' +
-        '<div class="author-avatar">\n ' +
-            '<img src="<%= currentUser.avatarUrl %>">\n ' +
-        '</div>\n ' +
         '<div class="comentario-fill">\n  ' +
             '<p class="author-name">\n <%= currentUser.name %>\n </p>\n ' +
             '<div class="comment-box" contenteditable="true" data-parent="<%= comment.parentID%>" data-comment="<%= comment.commentID %>" data-placeholder-content="Responder">' +

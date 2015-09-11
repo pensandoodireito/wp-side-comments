@@ -111,7 +111,7 @@
   cursor: pointer;
 }
 .commentable-container .side-comment .comments-wrapper ul.comments {
-  padding: 0 15px;
+  padding: 0 15px 0 0;
 }
 .commentable-container .side-comment .comments {
   list-style: none;
@@ -172,8 +172,10 @@
 .commentable-container .side-comment .comment-weight-container {
   display: inline-block;
 }
-.commentable-container .side-comment ul.comments li {
-  padding: 15px 0 0 0;
+.commentable-container .side-comment ul.comments li.comment-main {
+  border-left: 1px dashed #dbdbdb;
+  margin: 0 0 20px 0;
+  padding: 15px 0 0 15px;
 }
 .commentable-container .side-comment .author-avatar {
   float: left;
@@ -200,25 +202,23 @@
   opacity: 0.5;
 }
 .commentable-container .side-comment .comentario-fill {
-  float: left;
-  width: 80%;
-  margin-left: 5px;
-  padding-bottom: 10px;
-  border-bottom: 1px solid #cccccc;
+  width: 100%;
+  padding-bottom: 15px;
+  border-bottom: 1px dashed #dbdbdb;
 }
 .commentable-container .side-comment .right-of-avatar {
   float: left;
   width: 158px;
 }
 .commentable-container .side-comment .author-name {
-  line-height: 16px;
-  margin: 0 0 2px 0;
+  font-size: 15px;
+  margin: 0;
   font-weight: 700;
   text-decoration: none;
   color: #222222;
 }
 .commentable-container .side-comment .comment-time {
-  font-size: 11px;
+  font-size: 10px;
   color: #686868;
 }
 .commentable-container .side-comment a.author-name:hover {
@@ -339,7 +339,6 @@
   position: absolute;
   color: #999999;
 }
-.commentable-container .side-comment ul.comments li:first-child,
 .commentable-container .side-comment .comment-form:first-child,
 .commentable-container .side-comment .comment-form:last-child {
   border: none;
