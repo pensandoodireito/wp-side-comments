@@ -552,53 +552,54 @@
 		public static function wp_ajax_add_side_comment__AJAXHandler()
 		{
 
-			if( !wp_verify_nonce( $_REQUEST['nonce'], 'side_comments_nonce' ) ) {
-				exit( __( 'Nonce check failed', 'wp-side-comments' ) );
+			if (!wp_verify_nonce($_REQUEST['nonce'], 'side_comments_nonce')) {
+				wp_send_json_error(array(
+					'error_message' => __('Você não pode executar esta ação. Tente novamente mais tarde.', 'wp-side-comments')
+				));
 			}
 
 			// Collect data sent to us via the AJAX request
-			$postID 		= absint( $_REQUEST['postID'] );
-			$sectionID 		= absint( $_REQUEST['sectionID'] );
-			$commentText	= strip_tags( $_REQUEST['comment'], '<p><a><br>' );
-			$authorName		= sanitize_text_field( $_REQUEST['authorName'] );
-			$authorID 		= absint( $_REQUEST['authorId'] );
-			$parentID 		= absint( $_REQUEST['parentID'] );
+			$postID = absint($_REQUEST['postID']);
+			$sectionID = absint($_REQUEST['sectionID']);
+			$commentText = strip_tags($_REQUEST['comment'], '<p><a><br>');
+			$authorName = sanitize_text_field($_REQUEST['authorName']);
+			$authorID = absint($_REQUEST['authorId']);
+			$parentID = absint($_REQUEST['parentID']);
 
-			$user = get_user_by( 'id', $authorID );
+			$user = get_user_by('id', $authorID);
 
-			if( !empty( $_SERVER['HTTP_CLIENT_IP'] ) ){
+			if (!empty($_SERVER['HTTP_CLIENT_IP'])) {
 				$ip = $_SERVER['HTTP_CLIENT_IP'];
-			}elseif( !empty( $_SERVER['HTTP_X_FORWARDED_FOR'] ) ){
+			} elseif (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
 				$ip = $_SERVER['HTTP_X_FORWARDED_FOR'];
-			}else{
+			} else {
 				$ip = $_SERVER['REMOTE_ADDR'];
 			}
 
-			$commentApproval = apply_filters( 'wp_side_comments_default_comment_approved_status', 1 );
+			$commentApproval = apply_filters('wp_side_comments_default_comment_approved_status', 1);
 
 			// The data we need for wp_insert_comment
 			$wpInsertCommentArgs = array(
-				'comment_post_ID' 		=> $postID,
-				'comment_author' 		=> $authorName,
-				'comment_author_email' 	=> $user->user_email,
-				'comment_author_url' 	=> null,
-				'comment_content' 		=> $commentText,
-				'comment_type' 			=> 'side-comment',
-				'comment_parent' 		=> $parentID,
-				'user_id' 				=> $authorID,
-				'comment_author_IP' 	=> $ip,
-				'comment_agent' 		=> $_SERVER['HTTP_USER_AGENT'],
-				'comment_date' 			=> null,
-				'comment_approved' 		=> $commentApproval
+				'comment_post_ID' => $postID,
+				'comment_author' => $authorName,
+				'comment_author_email' => $user->user_email,
+				'comment_author_url' => null,
+				'comment_content' => $commentText,
+				'comment_type' => 'side-comment',
+				'comment_parent' => $parentID,
+				'user_id' => $authorID,
+				'comment_author_IP' => $ip,
+				'comment_agent' => $_SERVER['HTTP_USER_AGENT'],
+				'comment_date' => null,
+				'comment_approved' => $commentApproval
 			);
 
-			$newCommentID = wp_insert_comment( $wpInsertCommentArgs );
+			$newCommentID = wp_insert_comment($wpInsertCommentArgs);
 
-			if( $newCommentID )
-			{
+			if ($newCommentID) {
 
 				// Now we have a new comment ID, we need to add the meta for the section, stored as 'side-comment-section'
-				update_comment_meta( $newCommentID, 'side-comment-section', $sectionID );
+				update_comment_meta($newCommentID, 'side-comment-section', $sectionID);
 				$comment = get_comment($newCommentID);
 				// Setup our data which we're echoing
 				$result = array(
@@ -607,36 +608,24 @@
 					'commentApproval' => $commentApproval,
 					'commentTime' => static::getFriendlyCommentTime($comment)
 				);
-			}
-			else
-			{
-
+			} else {
 				// wp_insert_comment failed
 				$result = array(
-					'type' => 'failure',
-					'reason' => __( 'wp_insert_comment failed', 'wp-side-comments' )
+					'error_message' => __('Seu comentário não pôde ser inserido', 'wp-side-comments')
 				);
-
 			}
 
-			if( !empty( $_SERVER['HTTP_X_REQUESTED_WITH'] ) && strtolower( $_SERVER['HTTP_X_REQUESTED_WITH'] ) == 'xmlhttprequest' )
-			{
-
-				$result = json_encode( $result );
-				echo $result;
-
+			if (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest') {
+				if (isset($result['error_message'])) {
+					wp_send_json_error($result);
+				} else {
+					wp_send_json_success($result);
+				}
+			} else {
+				header('Location: ' . $_SERVER['HTTP_REFERER']);
 			}
-			else
-			{
-
-				header( 'Location: ' . $_SERVER['HTTP_REFERER'] );
-
-			}
-
-			die();
 
 		}/* wp_ajax_add_side_comment__AJAXHandler() */
-
 
         /**
          * AJAX handler for when someone is NOT logged in and trying to make/delete a comment.
@@ -650,16 +639,10 @@
          */
         public static function wp_ajax_nopriv_side_comment__handler()
         {
-            $result = array(
-                'type' => 'failure',
-                'reason' => __('Você precisa estar logado para executar esta ação.', 'wp-side-comments')
-            );
-
-            $result = json_encode($result);
-            echo $result;
-
-            die();
-        }/* wp_ajax_nopriv_side_comment__hanlder() */
+			wp_send_json_error(array(
+				'error_message' => __('Você precisa estar logado para executar esta ação.', 'wp-side-comments')
+			));
+        }/* wp_ajax_nopriv_side_comment__handler() */
 
 		/**
 		 * AJAX handler for when a comment is deleted
