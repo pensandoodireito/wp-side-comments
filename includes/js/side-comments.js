@@ -3421,6 +3421,25 @@ require.register("side-comments/templates/comment.html", function (exports, requ
     '<div class="comment-form clearfix" data-parent="<%= comment.parentID%>" data-comment="<%= comment.commentID %>">\n ' +
         '<div class="comentario-fill">\n  ' +
             '<p class="author-name">\n <%= currentUser.name %>\n </p>\n ' +
+
+                // mensagens de erro, aviso, alerta etc...
+                '<div class="alert alert-success mt-xs mb-xs pt-xs pb-xs fontsize-sm" role="alert">\n ' +
+                    '<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>\n ' +
+                    '<p>Texto de <a href="#" class="alert-link">Sucesso</a></p>\n ' +
+                '</div>\n ' +
+                '<div class="alert alert-info mt-xs mb-xs pt-xs pb-xs fontsize-sm" role="alert">\n ' +
+                    '<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>\n ' +
+                    '<p>Texto de <a href="#" class="alert-link">Info</a></p>\n ' +
+                '</div>\n ' +
+                '<div class="alert alert-warning mt-xs mb-xs pt-xs pb-xs fontsize-sm" role="alert">\n ' +
+                    '<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>\n ' +
+                    '<p>Texto de <a href="#" class="alert-link">Aviso</a></p>\n ' +
+                '</div>\n ' +
+                '<div class="alert alert-danger mt-xs mb-xs pt-xs pb-xs fontsize-sm" role="alert">\n ' +
+                    '<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>\n ' +
+                    '<p>Texto de <a href="#" class="alert-link">Erro</a></p>\n ' +
+                '</div>\n ' +
+
             '<div class="comment-box" contenteditable="true" data-parent="<%= comment.parentID%>" data-comment="<%= comment.commentID %>" data-placeholder-content="Responder">' +
             '</div>\n ' +
             '<div class="actions">\n ' +
