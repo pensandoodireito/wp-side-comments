@@ -153,10 +153,18 @@ jQuery(document).ready(function ($) {
 
     });
 // Adds .active to the parent p.commentable-section of .marker when clicked
+
     $(".marker", ".side-comment").on('click', function () {
 
         if (!$(this).parent().hasClass('active')) {
-            $(this).parent().parent('p.commentable-section').addClass('active');
+            var parent = $(this).parent().parent('p.commentable-section');
+            parent.addClass('active');
+
+            $('body').bind('mousewheel', function(e) {
+                    var $div = parent.find('.comments-estructure');
+                    $div.scrollTop($div.scrollTop() - e.originalEvent.wheelDelta);
+                    return false;
+            });
         } else {
             $(this).parent().parent('p.commentable-section').removeClass('active');
         }
@@ -169,6 +177,8 @@ jQuery(document).ready(function ($) {
             return; // click happened within the dialog, do nothing here
         } else { // click was outside the dialog, so close it
             $(".commentable-section").removeClass("active");
+            // Return to page scroll
+            $('body').unbind('mousewheel');
         }
     });
 
