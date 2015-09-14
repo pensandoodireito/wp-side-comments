@@ -7,6 +7,25 @@
         </div>
     </div>
 </div>
-<div class="back-to-top">
-    <a href="#" class="white"><i class="fa fa-level-up"></i> Voltar para o topo</a>
+<div class="hidden">
+    <div class="alert alert-success mt-xs mb-xs pt-xs pb-xs fontsize-sm" role="alert">
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span>
+        </button>
+        <p>Texto de <a href="#" class="alert-link">Sucesso</a></p>
+    </div>
+    <div class="alert alert-info mt-xs mb-xs pt-xs pb-xs fontsize-sm" role="alert">
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span>
+        </button>
+        <p>Texto de <a href="#" class="alert-link">Info</a></p>
+    </div>
+    <div class="alert alert-warning mt-xs mb-xs pt-xs pb-xs fontsize-sm" role="alert">
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span>
+        </button>
+        <p>Texto de <a href="#" class="alert-link">Aviso</a></p>
+    </div>
+    <div class="alert alert-danger mt-xs mb-xs pt-xs pb-xs fontsize-sm" role="alert">
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span>
+        </button>
+        <p>Texto de <a href="#" class="alert-link">Erro</a></p>
+    </div>
 </div>

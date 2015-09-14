@@ -88,7 +88,7 @@ jQuery("document").ready(function ($) {
     }
 
     function scrollTo(element) {
-        $('body').animate({
+        $('body,html').animate({
             scrollTop: $(element).offset().top - $('.menu-topo-mc').outerHeight()
         }, 500);
     }

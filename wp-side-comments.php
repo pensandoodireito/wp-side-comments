@@ -81,6 +81,11 @@
             add_action('wp_ajax_comment_vote_callback', array($this, 'comment_vote_callback'));
             add_action('wp_ajax_nopriv_comment_vote_callback', array($this, 'comment_vote_callback'));
 
+			//Set up Ajax handlers for refresh nonces
+			add_action('wp_ajax_refresh_nonce_callback', array($this, 'refresh_nonce_callback'));
+			add_action('wp_ajax_nopriv_refresh_nonce_callback', array($this, 'wp_ajax_nopriv_side_comment__handler'));
+
+			// Get the proper template for post type texto-em-debate
             //Set up AJAX handlers for list last comments per section
             add_action('wp_ajax_last_comments_callback', array($this, 'last_comments_callback'));
             add_action('wp_ajax_nopriv_last_comments_callback', array($this, 'last_comments_callback'));
@@ -99,57 +104,55 @@
 		 * @return null
 		 */
 
-		public function wp_enqueue_scripts__loadScriptsAndStyles()
-		{
+        public function wp_enqueue_scripts__loadScriptsAndStyles()
+        {
 
-			// Ensure we're on a post where we want to load our scripts/styles
-			$validScreen = $this->weAreOnAValidScreen();
+            // Ensure we're on a post where we want to load our scripts/styles
+            $validScreen = $this->weAreOnAValidScreen();
 
-			if( !$validScreen ){
-				return;
-			}
+            if (!$validScreen) {
+                return;
+            }
 
-			wp_register_style( 'side-comments-style', CTLT_WP_SIDE_COMMENTS_PLUGIN_URL . 'includes/css/side-comments-full.css' );
-			wp_register_script( 'side-comments-script', CTLT_WP_SIDE_COMMENTS_PLUGIN_URL . 'includes/js/side-comments.js', array ( 'jquery' ) );
-			wp_register_script( 'wp-side-comments-script', CTLT_WP_SIDE_COMMENTS_PLUGIN_URL . 'includes/js/wp-side-comments.js', array ( 'jquery', 'side-comments-script' ), null, true );
-			wp_register_style( 'texto-em-debate-style', CTLT_WP_SIDE_COMMENTS_PLUGIN_URL . 'includes/css/texto-em-debate.css');
+            wp_register_style('side-comments-style', CTLT_WP_SIDE_COMMENTS_PLUGIN_URL . 'includes/css/side-comments-full.css');
+            wp_register_style('texto-em-debate-style', CTLT_WP_SIDE_COMMENTS_PLUGIN_URL . 'includes/css/texto-em-debate.css');
 
-			wp_register_script('side-comments-script', CTLT_WP_SIDE_COMMENTS_PLUGIN_URL . 'includes/js/side-comments.js', array('jquery'));
-			wp_register_script('wp-side-comments-script', CTLT_WP_SIDE_COMMENTS_PLUGIN_URL . 'includes/js/wp-side-comments.js', array('jquery', 'side-comments-script'), null, true);
-			wp_register_script('texto-em-debate-script', CTLT_WP_SIDE_COMMENTS_PLUGIN_URL . 'includes/js/texto-em-debate.js', array('jquery'), null, true);
-			wp_register_script('highlight-script', CTLT_WP_SIDE_COMMENTS_PLUGIN_URL . 'includes/js/jquery.highlight-5.js', array('jquery'));
+            wp_register_script('side-comments-script', CTLT_WP_SIDE_COMMENTS_PLUGIN_URL . 'includes/js/side-comments.js', array('jquery'));
+            wp_register_script('wp-side-comments-script', CTLT_WP_SIDE_COMMENTS_PLUGIN_URL . 'includes/js/wp-side-comments.js', array('jquery', 'side-comments-script'), null, true);
+            wp_register_script('highlight-script', CTLT_WP_SIDE_COMMENTS_PLUGIN_URL . 'includes/js/jquery.highlight-5.js', array('jquery'));
+            wp_register_script('texto-em-debate-script', CTLT_WP_SIDE_COMMENTS_PLUGIN_URL . 'includes/js/texto-em-debate.js', array('jquery', 'highlight-script'), null, true);
 
-			wp_enqueue_style('side-comments-style');
-			wp_enqueue_style('texto-em-debate-style');
+            wp_enqueue_style('side-comments-style');
+            wp_enqueue_style('texto-em-debate-style');
 
-			wp_enqueue_script('side-comments-script');
-			wp_enqueue_script('wp-side-comments-script');
-			wp_enqueue_script('texto-em-debate-script');
-			wp_enqueue_script('highlight-script');
+            wp_enqueue_script('side-comments-script');
+            wp_enqueue_script('wp-side-comments-script');
+            wp_enqueue_script('highlight-script');
+            wp_enqueue_script('texto-em-debate-script');
 
-			// Need to get some data for our JS, which we pass to it via localization
-			$data = $this->getCommentsData();
+            // Need to get some data for our JS, which we pass to it via localization
+            $data = $this->getCommentsData();
 
-			// ENsure we have a nonce for AJAX purposes
-			$data['nonce'] = wp_create_nonce( 'side_comments_nonce' );
+            // ENsure we have a nonce for AJAX purposes
+            $data['nonce'] = wp_create_nonce('side_comments_nonce');
 
             //create a nonce for Comment Voting
-            $data['voting_nonce'] = wp_create_nonce( 'side_comments_voting_nonce' );
+            $data['voting_nonce'] = wp_create_nonce('side_comments_voting_nonce');
 
             //create a nonce gor last comments
 			//$data['last_comments_nonce'] = wp_create_nonce('side_comments_last_comments_nonce');
 
             // We also need the admin url as we need to send an AJAX request to it
-			// ToDo: fix this, as we need this to not be https for it to work atm
-			$adminAjaxURL = admin_url( 'admin-ajax.php' );
-			$nonHTTPS = preg_replace( '/^https(?=:\/\/)/i', 'http', $adminAjaxURL );
-			$data['ajaxURL'] = $nonHTTPS;
+            // ToDo: fix this, as we need this to not be https for it to work atm
+            $adminAjaxURL = admin_url('admin-ajax.php');
+            $nonHTTPS = preg_replace('/^https(?=:\/\/)/i', 'http', $adminAjaxURL);
+            $data['ajaxURL'] = $nonHTTPS;
 
-			$data['containerSelector'] = apply_filters( 'wp_side_comments_container_css_selector', '.commentable-container' );
+            $data['containerSelector'] = apply_filters('wp_side_comments_container_css_selector', '.commentable-container');
 
-			wp_localize_script( 'wp-side-comments-script', 'commentsData', $data );
+            wp_localize_script('wp-side-comments-script', 'commentsData', $data);
 
-		}/* wp_enqueue_scripts__loadScriptsAndStyles() */
+        }/* wp_enqueue_scripts__loadScriptsAndStyles() */
 
 
 		/**
@@ -552,53 +555,54 @@
 		public static function wp_ajax_add_side_comment__AJAXHandler()
 		{
 
-			if( !wp_verify_nonce( $_REQUEST['nonce'], 'side_comments_nonce' ) ) {
-				exit( __( 'Nonce check failed', 'wp-side-comments' ) );
+			if (!wp_verify_nonce($_REQUEST['nonce'], 'side_comments_nonce')) {
+				wp_send_json_error(array(
+					'error_message' => __('Você não pode executar esta ação. Tente novamente mais tarde.', 'wp-side-comments')
+				));
 			}
 
 			// Collect data sent to us via the AJAX request
-			$postID 		= absint( $_REQUEST['postID'] );
-			$sectionID 		= absint( $_REQUEST['sectionID'] );
-			$commentText	= strip_tags( $_REQUEST['comment'], '<p><a><br>' );
-			$authorName		= sanitize_text_field( $_REQUEST['authorName'] );
-			$authorID 		= absint( $_REQUEST['authorId'] );
-			$parentID 		= absint( $_REQUEST['parentID'] );
+			$postID = absint($_REQUEST['postID']);
+			$sectionID = absint($_REQUEST['sectionID']);
+			$commentText = strip_tags($_REQUEST['comment'], '<p><a><br>');
+			$authorName = sanitize_text_field($_REQUEST['authorName']);
+			$authorID = absint($_REQUEST['authorId']);
+			$parentID = absint($_REQUEST['parentID']);
 
-			$user = get_user_by( 'id', $authorID );
+			$user = get_user_by('id', $authorID);
 
-			if( !empty( $_SERVER['HTTP_CLIENT_IP'] ) ){
+			if (!empty($_SERVER['HTTP_CLIENT_IP'])) {
 				$ip = $_SERVER['HTTP_CLIENT_IP'];
-			}elseif( !empty( $_SERVER['HTTP_X_FORWARDED_FOR'] ) ){
+			} elseif (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
 				$ip = $_SERVER['HTTP_X_FORWARDED_FOR'];
-			}else{
+			} else {
 				$ip = $_SERVER['REMOTE_ADDR'];
 			}
 
-			$commentApproval = apply_filters( 'wp_side_comments_default_comment_approved_status', 1 );
+			$commentApproval = apply_filters('wp_side_comments_default_comment_approved_status', 1);
 
 			// The data we need for wp_insert_comment
 			$wpInsertCommentArgs = array(
-				'comment_post_ID' 		=> $postID,
-				'comment_author' 		=> $authorName,
-				'comment_author_email' 	=> $user->user_email,
-				'comment_author_url' 	=> null,
-				'comment_content' 		=> $commentText,
-				'comment_type' 			=> 'side-comment',
-				'comment_parent' 		=> $parentID,
-				'user_id' 				=> $authorID,
-				'comment_author_IP' 	=> $ip,
-				'comment_agent' 		=> $_SERVER['HTTP_USER_AGENT'],
-				'comment_date' 			=> null,
-				'comment_approved' 		=> $commentApproval
+				'comment_post_ID' => $postID,
+				'comment_author' => $authorName,
+				'comment_author_email' => $user->user_email,
+				'comment_author_url' => null,
+				'comment_content' => $commentText,
+				'comment_type' => 'side-comment',
+				'comment_parent' => $parentID,
+				'user_id' => $authorID,
+				'comment_author_IP' => $ip,
+				'comment_agent' => $_SERVER['HTTP_USER_AGENT'],
+				'comment_date' => null,
+				'comment_approved' => $commentApproval
 			);
 
-			$newCommentID = wp_insert_comment( $wpInsertCommentArgs );
+			$newCommentID = wp_insert_comment($wpInsertCommentArgs);
 
-			if( $newCommentID )
-			{
+			if ($newCommentID) {
 
 				// Now we have a new comment ID, we need to add the meta for the section, stored as 'side-comment-section'
-				update_comment_meta( $newCommentID, 'side-comment-section', $sectionID );
+				update_comment_meta($newCommentID, 'side-comment-section', $sectionID);
 				$comment = get_comment($newCommentID);
 				// Setup our data which we're echoing
 				$result = array(
@@ -607,36 +611,24 @@
 					'commentApproval' => $commentApproval,
 					'commentTime' => static::getFriendlyCommentTime($comment)
 				);
-			}
-			else
-			{
-
+			} else {
 				// wp_insert_comment failed
 				$result = array(
-					'type' => 'failure',
-					'reason' => __( 'wp_insert_comment failed', 'wp-side-comments' )
+					'error_message' => __('Seu comentário não pôde ser inserido', 'wp-side-comments')
 				);
-
 			}
 
-			if( !empty( $_SERVER['HTTP_X_REQUESTED_WITH'] ) && strtolower( $_SERVER['HTTP_X_REQUESTED_WITH'] ) == 'xmlhttprequest' )
-			{
-
-				$result = json_encode( $result );
-				echo $result;
-
+			if (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest') {
+				if (isset($result['error_message'])) {
+					wp_send_json_error($result);
+				} else {
+					wp_send_json_success($result);
+				}
+			} else {
+				header('Location: ' . $_SERVER['HTTP_REFERER']);
 			}
-			else
-			{
-
-				header( 'Location: ' . $_SERVER['HTTP_REFERER'] );
-
-			}
-
-			die();
 
 		}/* wp_ajax_add_side_comment__AJAXHandler() */
-
 
         /**
          * AJAX handler for when someone is NOT logged in and trying to make/delete a comment.
@@ -650,16 +642,10 @@
          */
         public static function wp_ajax_nopriv_side_comment__handler()
         {
-            $result = array(
-                'type' => 'failure',
-                'reason' => __('Você precisa estar logado para executar esta ação.', 'wp-side-comments')
-            );
-
-            $result = json_encode($result);
-            echo $result;
-
-            die();
-        }/* wp_ajax_nopriv_side_comment__hanlder() */
+			wp_send_json_error(array(
+				'error_message' => __('Você precisa estar logado para executar esta ação.', 'wp-side-comments')
+			));
+        }/* wp_ajax_nopriv_side_comment__handler() */
 
 		/**
 		 * AJAX handler for when a comment is deleted
@@ -1020,6 +1006,14 @@
 
             return $value;
         }
+
+		public function refresh_nonce_callback()
+		{
+			$data['nonce'] = wp_create_nonce('side_comments_nonce');
+			$data['voting_nonce'] = wp_create_nonce('side_comments_voting_nonce');
+			wp_send_json_success($data);
+		}
+
 
         public function last_comments_callback()
         {

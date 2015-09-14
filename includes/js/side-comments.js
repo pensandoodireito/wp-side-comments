@@ -419,10 +419,7 @@ SideComments.prototype.initialize = function (existingComments) {
     var sectionId = $section.data('section-id').toString();
     var sectionComments = _.find(this.existingComments, {sectionId: sectionId});
 
-    //evita que o bloco de comentários seja exibido para blocos que não tem comentários e não estão logados.
-    if (sectionComments || this.currentUser) {
       this.sections.push(new Section(this.eventPipe, $section, this.currentUser, sectionComments));
-    }
 
   }, this);
 };
@@ -556,8 +553,9 @@ SideComments.prototype.initialize = function (existingComments) {
     SideComments.prototype.setCurrentUser = function (currentUser) {
         this.hideComments();
         this.currentUser = currentUser;
+        var instance = this;
         _.each(this.sections, function (section) {
-            section.currentUser = this.currentUser;
+            section.currentUser = instance.currentUser;
             section.render();
         });
     };
@@ -606,7 +604,6 @@ require.register("side-comments/js/section.js", function (exports, require, modu
         this.id = $el.data('section-id');
 
         this.$el.on(this.clickEventName, '.side-comment .marker', _.bind(this.markerClick, this));
-        this.$el.on(this.clickEventName, _.bind(this.markerClick, this));
         this.$el.on(this.clickEventName, '.side-comment .add-comment', _.bind(this.addCommentClick, this));
         this.$el.on(this.clickEventName, '.side-comment .add-reply', _.bind(this.addReplyClick, this));
         this.$el.on(this.clickEventName, '.side-comment .post', _.bind(this.postCommentClick, this));
@@ -750,7 +747,7 @@ require.register("side-comments/js/section.js", function (exports, require, modu
         var comment = {
             sectionId: this.id,
             comment: commentBody,
-            authorAvatarUrl: this.currentUser.avatarUrl,
+            //authorAvatarUrl: this.currentUser.avatarUrl,
             authorName: this.currentUser.name,
             authorId: this.currentUser.id,
             parentID: commentID
@@ -838,6 +835,7 @@ require.register("side-comments/js/section.js", function (exports, require, modu
             this.deselect();
             this.eventPipe.emit('sectionDeselected', this);
         } else {
+            this.$el.addClass('active');
             this.$el.find('.side-comment').addClass('active');
 
             if (this.comments.length === 0 && this.currentUser) {
@@ -853,6 +851,7 @@ require.register("side-comments/js/section.js", function (exports, require, modu
      */
     Section.prototype.deselect = function () {
         this.$el.find('.side-comment').removeClass('active');
+        this.$el.removeClass('active');
         this.hideCommentForm();
     };
 
@@ -3374,9 +3373,6 @@ require.register("side-comments/templates/section.html", function (exports, requ
         '<a href="#" class="add-comment mt-sm btn btn-success btn-md" data-parent="0" data-comment="">Deixe seu comentário</a>\n \n '+
         
         '<div class="comment-form" data-parent="0" data-comment="">\n '+
-            '<div class="author-avatar">\n ' +
-                '<img src="<%= currentUser.avatarUrl %>">\n '+
-            '</div>\n ' +
             '<p class="author-name">\n <%= currentUser.name %>\n        </p>\n ' +
             '<div class="comment-box" contenteditable="true" data-placeholder-content="Deixe seu comentário">' +
             '</div>\n ' +
@@ -3385,6 +3381,8 @@ require.register("side-comments/templates/section.html", function (exports, requ
                 '<a href="#" class="action-link cancel btn btn-default" data-parent="0" data-comment="">Cancelar</a>\n ' +
             '</div>\n ' +
         '</div>\n ' +
+        '<% } else { %>' +
+        '<div> Faça login para poder comentar </div>' +
         '<% } %>' +
     '</div>\n' +
 '</div>'
@@ -3393,11 +3391,8 @@ require.register("side-comments/templates/section.html", function (exports, requ
 
 require.register("side-comments/templates/comment.html", function (exports, require, module) {
     module.exports = 
-'<li class="clearfix" data-comment-id="<%= comment.commentID %>" data-parent-id="<%= comment.parentID%>">\n  ' +
+'<li class="clearfix comment-main" data-comment-id="<%= comment.commentID %>" data-parent-id="<%= comment.parentID%>">\n  ' +
     '<div class="clearfix">\n ' +
-        '<div class="author-avatar">\n ' +
-                '<img src="<%= comment.authorAvatarUrl %>">\n ' +
-        '</div>\n  ' +
         '<div class="comentario-fill">\n  ' +
             '<h6 class="author-name">\n<%= comment.authorName %>\n</h6>\n ' +
             '<p class="comment-time">\n    <%= comment.time %>\n  </p>\n ' +
@@ -3409,8 +3404,8 @@ require.register("side-comments/templates/comment.html", function (exports, requ
                 //'<span id="comment-weight-value-<%= comment.commentID %>"><%= comment.karma %></span>\n ' +
 
                 '<div class="mt-xs">\n' +
-                    '<a data-comment-id="<%= comment.commentID %>" class="vote-up btn btn-default btn-xs fontsize-sm text-green" href="#"><i class="fa fa-thumbs-o-up"></i> Concordo <span id="comment-upvote-value-<%= comment.commentID %>"><%= comment.upvotes %></span></a> \n ' +
-                    '<a data-comment-id="<%= comment.commentID %>" class="vote-down btn btn-default btn-xs fontsize-sm red" href="#"><i class="fa fa-thumbs-o-down"></i> Discordo <span id="comment-downvote-value-<%= comment.commentID %>"><%= comment.downvotes %></span></a>\n ' +        
+                    '<a data-comment-id="<%= comment.commentID %>" class="vote-up vote-btn btn btn-default btn-xs fontsize-sm text-green" href="#"><i class="fa fa-thumbs-o-up"></i> Concordo <span id="comment-upvote-value-<%= comment.commentID %>"><%= comment.upvotes %></span></a> \n ' +
+                    '<a data-comment-id="<%= comment.commentID %>" class="vote-down vote-btn btn btn-default btn-xs fontsize-sm red" href="#"><i class="fa fa-thumbs-o-down"></i> Discordo <span id="comment-downvote-value-<%= comment.commentID %>"><%= comment.downvotes %></span></a>\n ' +
                 '</div>\n ' +
                 '<% if (currentUser){ %>\n ' +
                 '<div class="mt-xs">\n' +
@@ -3423,11 +3418,7 @@ require.register("side-comments/templates/comment.html", function (exports, requ
 
     '<% if (currentUser){ %>\n     ' +
 
-
     '<div class="comment-form clearfix" data-parent="<%= comment.parentID%>" data-comment="<%= comment.commentID %>">\n ' +
-        '<div class="author-avatar">\n ' +
-            '<img src="<%= currentUser.avatarUrl %>">\n ' +
-        '</div>\n ' +
         '<div class="comentario-fill">\n  ' +
             '<p class="author-name">\n <%= currentUser.name %>\n </p>\n ' +
             '<div class="comment-box" contenteditable="true" data-parent="<%= comment.parentID%>" data-comment="<%= comment.commentID %>" data-placeholder-content="Responder">' +
@@ -3439,9 +3430,7 @@ require.register("side-comments/templates/comment.html", function (exports, requ
         '</div>\n ' +
     '</div>\n ' +
     '<% } %>' +
-    
-'</li>'
-        ;
+'</li>';
 });
 
 
