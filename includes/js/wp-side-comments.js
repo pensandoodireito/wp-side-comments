@@ -56,6 +56,8 @@ jQuery(document).ready(function ($) {
     sideComments.on('commentPosted', function (comment) {
         var parent = $('.comment-form.active');
 
+
+
         $.ajax({
             url: ajaxURL,
             dataType: 'json',
@@ -91,6 +93,8 @@ jQuery(document).ready(function ($) {
 
                     // We'll need this if we want to delete the comment.
                     var newComment = sideComments.insertComment(comment);
+                    var commentArea = $('#commentable-section-'+comment.sectionId+' .comments-estructure');
+                    commentArea.animate({ scrollTop: commentArea.find('.comments').height() }, 1000);
                 }
             },
             error: function (jqXHR, textStatus, errorThrown) {
