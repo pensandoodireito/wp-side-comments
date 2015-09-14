@@ -54,7 +54,14 @@ jQuery(document).ready(function ($) {
 
     // We need to listen for the post and delete events and post an AJAX response back to PHP
     sideComments.on('commentPosted', function (comment) {
-        var parent = $('.comment-form.active');
+        var section = $('#commentable-section-'+this.activeSection.id);
+        var parentID = comment.parentID;
+        var parent = null;
+        if (parentID){
+            parent = $(section).find('.comment-form[data-comment='+parentID+']');
+        }else{
+            parent = $(section).find('.comments-wrapper > .comment-form');
+        }
 
         $.ajax({
             url: ajaxURL,
