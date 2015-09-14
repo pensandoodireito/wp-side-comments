@@ -18,6 +18,9 @@
     //includes required classes for comment voting
     require_once plugin_dir_path(__FILE__) . 'classes/class-visitor.php';
 
+	//includes required classes for html parsing
+	require_once plugin_dir_path(__FILE__) . 'classes/simple_html_dom.php';
+
 	/**
 	 * Inclui o arquivo de configurações do Custom Post Type "Texto em Debate'
 	 */
@@ -32,9 +35,9 @@
         protected $visitor;
 
 		/**
-		 * @var int next number to use when creating commentable section id
+		 * @var int current section id number
 		 */
-		static $nextSectionId = 1;
+		static $currentSectionID = 0;
 
 		/**
 		 * Set up our actions and filters
@@ -90,7 +93,6 @@
             // Get the proper template for post type texto-em-debate
 			add_filter( 'single_template', array($this,'get_texto_em_debate_template'));
 		}/* __construct() */
-
 
 		/**
 		 * Register and enqueue the necessary scripts and styles
@@ -151,7 +153,6 @@
 
         }/* wp_enqueue_scripts__loadScriptsAndStyles() */
 
-
 		/**
 		 * Filter the post_class which is output on the containing element of the post
 		 *
@@ -188,13 +189,13 @@
          * calculates the next section id value based on existent values
          * @param $section
          */
-        private function calcNextSectionId($section)
-        {
-            $sectionNumber = filter_var($section->getAttribute('data-section-id'), FILTER_SANITIZE_NUMBER_INT);
-            if ($sectionNumber >= self::$nextSectionId) {
-                self::$nextSectionId = $sectionNumber + 1;
-            }
-        }
+		private function findCurrentSectionId($section)
+		{
+			$sectionNumber = filter_var($section->getAttribute('data-section-id'), FILTER_SANITIZE_NUMBER_INT);
+			if ($sectionNumber >= self::$currentSectionID) {
+				self::$currentSectionID = $sectionNumber;
+			}
+		}
 
         /**
          * Add our required classes and attributes to paragraph tags in the_content
@@ -204,33 +205,35 @@
          * @param string $content the post content
          * @return string $content modified post content with our classes/attributes
          */
-        public function addSideCommentsClassesToContent($content)
-        {
-            if ($this->get_current_post_type() == "texto-em-debate" && $content) {
-                $content = str_replace("\\\"", '"', $content);
-                $dom = new DOMDocument();
-                $dom->loadHTML(mb_convert_encoding($content, 'HTML-ENTITIES', 'UTF-8'), LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
-                $elements = $dom->getElementsByTagName('p');
+		public function addSideCommentsClassesToContent($content)
+		{
+			if ($this->get_current_post_type() == "texto-em-debate" && $content) {
+				$content = str_replace("\\\"", '"', $content);
 
-                foreach ($elements as $key => $element) {
-                    if ($element->hasAttribute('data-section-id')) {
-                        $this->calcNextSectionId($element);
-                    }
-                }
+				$dom = new simple_html_dom($content);
 
-                foreach ($elements as $element) {
-					if (!$element->hasAttribute('data-section-id')) {
-						$element->setAttribute('class', 'commentable-section');
-						$element->setAttribute('data-section-id', self::$nextSectionId);
-						$element->setAttribute('id', 'commentable-section-' . self::$nextSectionId);
-						self::$nextSectionId++;
+				$elements = $dom->find('p');
+
+				foreach ($elements as $key => $element) {
+					if ($element->hasAttribute('data-section-id')) {
+						$this->findCurrentSectionId($element);
 					}
-                }
+				}
 
-                return $dom->saveHTML();
-            }
-            return $content;
-        }
+				foreach ($elements as $element) {
+					if (!$element->hasAttribute('data-section-id')) {
+						self::$currentSectionID++;
+						$element->setAttribute('class', 'commentable-section');
+						$element->setAttribute('data-section-id', self::$currentSectionID);
+						$element->setAttribute('id', 'commentable-section-' . self::$currentSectionID);
+					}
+				}
+
+				return $dom->__toString();
+
+			}
+			return $content;
+		}
 
         /**
          * gets the current post type in the WordPress Admin
@@ -1040,10 +1043,12 @@
                 $postSections = $this->getPostSections($postID, $sectionIDs);
 
                 foreach ($sectionIDs as $sectionID) {
-                    $block = $this->createLastCommentsBlock($sectionID, $comments[$sectionID], $postSections[$sectionID]);
-                    if ($block) {
-                        $blocks[] = $block;
-                    }
+					if (isset($comments[$sectionID]) && isset($postSections[$sectionID])) {
+						$block = $this->createLastCommentsBlock($sectionID, $comments[$sectionID], $postSections[$sectionID]);
+						if ($block) {
+							$blocks[] = $block;
+						}
+					}
                 }
             }
             return $blocks;
@@ -1072,30 +1077,29 @@
             );
         }
 
-        private function getPostSections($postID, array $sections)
-        {
-            $postSections = array();
-            $post = get_post($postID);
+		private function getPostSections($postID, array $sections)
+		{
+			$postSections = array();
+			$post = get_post($postID);
 
-            if (!$post){
-                return false;
-            }
+			if (!$post) {
+				return false;
+			}
 
-            $dom = new DOMDocument();
-            libxml_use_internal_errors(true); //evita warnings devido a má formação do HTML
-            $dom->loadHTML($post->post_content, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
-            $elements = $dom->getElementsByTagName('p');
+			$dom = new simple_html_dom($post->post_content);
 
-            foreach ($elements as $key => $element) {
-                $sectionID = $element->hasAttribute('data-section-id') ? $element->getAttribute('data-section-id') : false;
-                if ($sectionID && in_array($sectionID, $sections)) {
-                    $postSections[$sectionID] = $element->nodeValue;
-                }
+			$elements = $dom->find('p');
 
-            }
+			foreach ($elements as $key => $element) {
+				$sectionID = $element->hasAttribute('data-section-id') ? $element->getAttribute('data-section-id') : false;
+				if ($sectionID && in_array($sectionID, $sections)) {
+					$postSections[$sectionID] = $element->plaintext;
+				}
 
-            return $postSections;
-        }
+			}
+
+			return $postSections;
+		}
 
         private function findLastComments($postID, array $sections, $commentsPerSection = 3)
         {
