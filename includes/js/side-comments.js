@@ -3394,7 +3394,7 @@ require.register("side-comments/templates/comment.html", function (exports, requ
 '<li class="clearfix comment-main" data-comment-id="<%= comment.commentID %>" data-parent-id="<%= comment.parentID%>">\n  ' +
     '<div class="clearfix">\n ' +
         '<div class="comentario-fill">\n  ' +
-            '<h6 class="author-name">\n<%= comment.authorName %>\n</h6>\n ' +
+            '<p class="author-name">\n<%= comment.authorName %>\n</p>\n ' +
             '<p class="comment-time">\n    <%= comment.time %>\n  </p>\n ' +
             '<p class="comment">\n    <%= comment.comment %>\n  </p>\n ' +
                 '<% if (currentUser && comment.authorId === currentUser.id){ %>\n ' +
