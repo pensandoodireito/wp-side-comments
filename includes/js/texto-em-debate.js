@@ -40,13 +40,6 @@ jQuery("document").ready(function ($) {
         }
     });
 
-    function scrollToHash(){
-        var urlHash = window.location.href.split("#")[1];
-        if (urlHash && $('#' + urlHash).length) {
-            scrollTo($('#' + urlHash));
-        }
-    }
-
     function highlightText() {
         var text = $("#txt-texto-em-debate").val();
 
@@ -98,6 +91,13 @@ jQuery("document").ready(function ($) {
         currentHighlight.removeClass("current");
         $(element).addClass("current");
         scrollTo(element);
+    }
+
+    function scrollToHash(){
+        var urlHash = window.location.href.split("#")[1];
+        if (urlHash && $('#' + urlHash).length) {
+            scrollTo($('#' + urlHash));
+        }
     }
 
     function scrollTo(element) {
