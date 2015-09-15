@@ -329,13 +329,12 @@
 
         private static function getFriendlyCommentTime($comment)
         {
-            $date = $comment->comment_date;
-            $time = strtotime($date);
+            $time = strtotime($comment->comment_date_gmt);
             $time_diff = time() - $time;
             if ($time_diff >= 0 && $time_diff < 24 * 60 * 60)
                 $display = sprintf(__('%s atrás'), human_time_diff($time));
             else //TODO: ajustar formato para o termo 'às' também ser recuperado do arquivo de tradução
-                $display = date_i18n(get_option('date_format').' \à\s '.get_option('time_format'), strtotime($date)) ;
+                $display = date_i18n(get_option('date_format').' \à\s '.get_option('time_format'), strtotime($comment->comment_date)) ;
 
             return $display;
         }
