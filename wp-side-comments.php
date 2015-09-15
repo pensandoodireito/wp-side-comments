@@ -18,10 +18,16 @@
     //includes required classes for comment voting
     require_once plugin_dir_path(__FILE__) . 'classes/class-visitor.php';
 
+	//includes required classes for html parsing
+	require_once plugin_dir_path(__FILE__) . 'classes/simple_html_dom.php';
+
 	/**
 	 * Inclui o arquivo de configurações do Custom Post Type "Texto em Debate'
 	 */
 	include(plugin_dir_path(__FILE__) . 'cpt-texto-em-debate.php');
+
+	/** Widget para exibição na capa */
+	include(plugin_dir_path(__FILE__) . 'comment-front-widget.php');
 
 	class CTLT_WP_Side_Comments
 	{
@@ -32,9 +38,9 @@
         protected $visitor;
 
 		/**
-		 * @var int next number to use when creating commentable section id
+		 * @var int current section id number
 		 */
-		static $nextSectionId = 1;
+		static $currentSectionID = 0;
 
 		/**
 		 * Set up our actions and filters
@@ -90,7 +96,6 @@
             // Get the proper template for post type texto-em-debate
 			add_filter( 'single_template', array($this,'get_texto_em_debate_template'));
 		}/* __construct() */
-
 
 		/**
 		 * Register and enqueue the necessary scripts and styles
@@ -151,7 +156,6 @@
 
         }/* wp_enqueue_scripts__loadScriptsAndStyles() */
 
-
 		/**
 		 * Filter the post_class which is output on the containing element of the post
 		 *
@@ -188,13 +192,13 @@
          * calculates the next section id value based on existent values
          * @param $section
          */
-        private function calcNextSectionId($section)
-        {
-            $sectionNumber = filter_var($section->getAttribute('data-section-id'), FILTER_SANITIZE_NUMBER_INT);
-            if ($sectionNumber >= self::$nextSectionId) {
-                self::$nextSectionId = $sectionNumber + 1;
-            }
-        }
+		private function findCurrentSectionId($section)
+		{
+			$sectionNumber = filter_var($section->getAttribute('data-section-id'), FILTER_SANITIZE_NUMBER_INT);
+			if ($sectionNumber >= self::$currentSectionID) {
+				self::$currentSectionID = $sectionNumber;
+			}
+		}
 
         /**
          * Add our required classes and attributes to paragraph tags in the_content
@@ -204,33 +208,35 @@
          * @param string $content the post content
          * @return string $content modified post content with our classes/attributes
          */
-        public function addSideCommentsClassesToContent($content)
-        {
-            if ($this->get_current_post_type() == "texto-em-debate" && $content) {
-                $content = str_replace("\\\"", '"', $content);
-                $dom = new DOMDocument();
-                $dom->loadHTML(mb_convert_encoding($content, 'HTML-ENTITIES', 'UTF-8'), LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
-                $elements = $dom->getElementsByTagName('p');
+		public function addSideCommentsClassesToContent($content)
+		{
+			if ($this->get_current_post_type() == "texto-em-debate" && $content) {
+				$content = str_replace("\\\"", '"', $content);
 
-                foreach ($elements as $key => $element) {
-                    if ($element->hasAttribute('data-section-id')) {
-                        $this->calcNextSectionId($element);
-                    }
-                }
+				$dom = new simple_html_dom($content);
 
-                foreach ($elements as $element) {
-					if (!$element->hasAttribute('data-section-id')) {
-						$element->setAttribute('class', 'commentable-section');
-						$element->setAttribute('data-section-id', self::$nextSectionId);
-						$element->setAttribute('id', 'commentable-section-' . self::$nextSectionId);
-						self::$nextSectionId++;
+				$elements = $dom->find('p');
+
+				foreach ($elements as $key => $element) {
+					if ($element->hasAttribute('data-section-id')) {
+						$this->findCurrentSectionId($element);
 					}
-                }
+				}
 
-                return $dom->saveHTML();
-            }
-            return $content;
-        }
+				foreach ($elements as $element) {
+					if (!$element->hasAttribute('data-section-id')) {
+						self::$currentSectionID++;
+						$element->setAttribute('class', 'commentable-section');
+						$element->setAttribute('data-section-id', self::$currentSectionID);
+						$element->setAttribute('id', 'commentable-section-' . self::$currentSectionID);
+					}
+				}
+
+				return $dom->__toString();
+
+			}
+			return $content;
+		}
 
         /**
          * gets the current post type in the WordPress Admin
@@ -323,13 +329,12 @@
 
         private static function getFriendlyCommentTime($comment)
         {
-            $date = $comment->comment_date;
-            $time = strtotime($date);
+            $time = strtotime($comment->comment_date_gmt);
             $time_diff = time() - $time;
             if ($time_diff >= 0 && $time_diff < 24 * 60 * 60)
                 $display = sprintf(__('%s atrás'), human_time_diff($time));
             else //TODO: ajustar formato para o termo 'às' também ser recuperado do arquivo de tradução
-                $display = date_i18n(get_option('date_format').' \à\s '.get_option('time_format'), strtotime($date)) ;
+                $display = date_i18n(get_option('date_format').' \à\s '.get_option('time_format'), strtotime($comment->comment_date)) ;
 
             return $display;
         }
@@ -561,7 +566,7 @@
 			// Collect data sent to us via the AJAX request
 			$postID = absint($_REQUEST['postID']);
 			$sectionID = absint($_REQUEST['sectionID']);
-			$commentText = strip_tags($_REQUEST['comment'], '<p><a><br>');
+			$commentText = trim(strip_tags($_REQUEST['comment'], '<p><a><br>'));
 			$authorName = sanitize_text_field($_REQUEST['authorName']);
 			$authorID = absint($_REQUEST['authorId']);
 			$parentID = absint($_REQUEST['parentID']);
@@ -574,6 +579,12 @@
 				$ip = $_SERVER['HTTP_X_FORWARDED_FOR'];
 			} else {
 				$ip = $_SERVER['REMOTE_ADDR'];
+			}
+
+			if (strlen($commentText) == 0){
+				wp_send_json_error(array(
+					'error_message' => __('Você não pode enviar um comentário vazio.', 'wp-side-comments')
+				));
 			}
 
 			$commentApproval = apply_filters('wp_side_comments_default_comment_approved_status', 1);
@@ -623,6 +634,7 @@
 				}
 			} else {
 				header('Location: ' . $_SERVER['HTTP_REFERER']);
+				die;
 			}
 
 		}/* wp_ajax_add_side_comment__AJAXHandler() */
@@ -1040,10 +1052,12 @@
                 $postSections = $this->getPostSections($postID, $sectionIDs);
 
                 foreach ($sectionIDs as $sectionID) {
-                    $block = $this->createLastCommentsBlock($sectionID, $comments[$sectionID], $postSections[$sectionID]);
-                    if ($block) {
-                        $blocks[] = $block;
-                    }
+					if (isset($comments[$sectionID]) && isset($postSections[$sectionID])) {
+						$block = $this->createLastCommentsBlock($sectionID, $comments[$sectionID], $postSections[$sectionID]);
+						if ($block) {
+							$blocks[] = $block;
+						}
+					}
                 }
             }
             return $blocks;
@@ -1066,36 +1080,36 @@
 
         private function parseComment($comment){
             return array(
+				'id' => $comment->comment_ID,
                 'author' => $comment->comment_author,
                 'comment_text' => $comment->comment_content,
                 'date' => $this->getFriendlyCommentTime($comment)
             );
         }
 
-        private function getPostSections($postID, array $sections)
-        {
-            $postSections = array();
-            $post = get_post($postID);
+		private function getPostSections($postID, array $sections)
+		{
+			$postSections = array();
+			$post = get_post($postID);
 
-            if (!$post){
-                return false;
-            }
+			if (!$post) {
+				return false;
+			}
 
-            $dom = new DOMDocument();
-            libxml_use_internal_errors(true); //evita warnings devido a má formação do HTML
-            $dom->loadHTML($post->post_content, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
-            $elements = $dom->getElementsByTagName('p');
+			$dom = new simple_html_dom($post->post_content);
 
-            foreach ($elements as $key => $element) {
-                $sectionID = $element->hasAttribute('data-section-id') ? $element->getAttribute('data-section-id') : false;
-                if ($sectionID && in_array($sectionID, $sections)) {
-                    $postSections[$sectionID] = $element->nodeValue;
-                }
+			$elements = $dom->find('p');
 
-            }
+			foreach ($elements as $key => $element) {
+				$sectionID = $element->hasAttribute('data-section-id') ? $element->getAttribute('data-section-id') : false;
+				if ($sectionID && in_array($sectionID, $sections)) {
+					$postSections[$sectionID] = $element->plaintext;
+				}
 
-            return $postSections;
-        }
+			}
+
+			return $postSections;
+		}
 
         private function findLastComments($postID, array $sections, $commentsPerSection = 3)
         {
