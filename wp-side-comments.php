@@ -566,7 +566,7 @@
 			// Collect data sent to us via the AJAX request
 			$postID = absint($_REQUEST['postID']);
 			$sectionID = absint($_REQUEST['sectionID']);
-			$commentText = strip_tags($_REQUEST['comment'], '<p><a><br>');
+			$commentText = trim(strip_tags($_REQUEST['comment'], '<p><a><br>'));
 			$authorName = sanitize_text_field($_REQUEST['authorName']);
 			$authorID = absint($_REQUEST['authorId']);
 			$parentID = absint($_REQUEST['parentID']);
@@ -579,6 +579,12 @@
 				$ip = $_SERVER['HTTP_X_FORWARDED_FOR'];
 			} else {
 				$ip = $_SERVER['REMOTE_ADDR'];
+			}
+
+			if (strlen($commentText) == 0){
+				wp_send_json_error(array(
+					'error_message' => __('Você não pode enviar um comentário vazio.', 'wp-side-comments')
+				));
 			}
 
 			$commentApproval = apply_filters('wp_side_comments_default_comment_approved_status', 1);
@@ -628,6 +634,7 @@
 				}
 			} else {
 				header('Location: ' . $_SERVER['HTTP_REFERER']);
+				die;
 			}
 
 		}/* wp_ajax_add_side_comment__AJAXHandler() */

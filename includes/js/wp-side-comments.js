@@ -55,52 +55,60 @@ jQuery(document).ready(function ($) {
     // We need to listen for the post and delete events and post an AJAX response back to PHP
     sideComments.on('commentPosted', function (comment) {
         var parent = $('.comment-form.active');
+        if (comment.comment.trim().length>0) {
+            $.ajax({
+                url: ajaxURL,
+                dataType: 'json',
+                type: 'POST',
+                data: {
+                    action: 'add_side_comment',
+                    nonce: nonce,
+                    postID: postID,
+                    sectionID: comment.sectionId,
+                    comment: comment.comment,
+                    authorName: comment.authorName,
+                    authorId: comment.authorId,
+                    parentID: comment.parentID
+                },
+                success: function (response) {
 
-        $.ajax({
-            url: ajaxURL,
-            dataType: 'json',
-            type: 'POST',
-            data: {
-                action: 'add_side_comment',
-                nonce: nonce,
-                postID: postID,
-                sectionID: comment.sectionId,
-                comment: comment.comment,
-                authorName: comment.authorName,
-                authorId: comment.authorId,
-                parentID: comment.parentID
-            },
-            success: function (response) {
+                    if (response.success === false) {
+                        var erro = $('.hidden > .alert-warning').clone();
+                        erro.find('p').html(response.data.error_message);
+                        erro.hide().appendTo(parent).fadeIn(1000).delay(5000).slideUp(1000, function () {
+                            $(this).remove();
+                        });
+                    } else {
+                        newCommentID = response.data.newCommentID;
+                        comment.id = response.data.newCommentID;
+                        comment.commentID = comment.id;
+                        comment.time = response.data.commentTime;
 
-                if (response.success === false) {
+                        //setting default values for a new comment
+                        comment.karma = 0;
+                        comment.upvotes = 0;
+                        comment.downvotes = 0;
+
+                        // We'll need this if we want to delete the comment.
+                        var newComment = sideComments.insertComment(comment);
+                    }
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
                     var erro = $('.hidden > .alert-danger').clone();
-                    erro.find('p').html(response.data.error_message);
+                    erro.find('p').html("Falha ao adicionar o comentário. Tente novamente mais tarde");
                     erro.hide().appendTo(parent).fadeIn(1000).delay(5000).slideUp(1000, function () {
                         $(this).remove();
                     });
-                } else {
-                    newCommentID = response.data.newCommentID;
-                    comment.id = response.data.newCommentID;
-                    comment.commentID = comment.id;
-                    comment.time = response.data.commentTime;
-
-                    //setting default values for a new comment
-                    comment.karma = 0;
-                    comment.upvotes = 0;
-                    comment.downvotes = 0;
-
-                    // We'll need this if we want to delete the comment.
-                    var newComment = sideComments.insertComment(comment);
                 }
-            },
-            error: function (jqXHR, textStatus, errorThrown) {
-                var erro = $('.hidden > .alert-danger').clone();
-                erro.find('p').html("Falha ao adicionar o comentário. Tente novamente mais tarde");
-                erro.hide().appendTo(parent).fadeIn(1000).delay(5000).slideUp(1000, function () {
-                    $(this).remove();
-                });
-            }
-        });
+            });
+        }else{
+            var erro = $('.hidden > .alert-warning').clone();
+            erro.find('p').html("Você não pode enviar um comentário vazio.");
+            erro.hide().appendTo(parent).fadeIn(1000).delay(5000).slideUp(1000, function () {
+                $(this).remove();
+            });
+
+        }
 
     });
 
@@ -219,7 +227,7 @@ jQuery(document).ready(function ($) {
 
             post.done(function (response) {
                 if (response.success === false) {
-                    var erro = $('.hidden > .alert-danger').clone();
+                    var erro = $('.hidden > .alert-warning').clone();
                     erro.find('p').html(response.data.error_message);
                     erro.hide().appendTo(parent).fadeIn(1000).delay(5000).slideUp(1000, function () {
                         $(this).remove();
