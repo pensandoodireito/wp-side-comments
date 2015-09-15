@@ -3382,7 +3382,7 @@ require.register("side-comments/templates/section.html", function (exports, requ
             '</div>\n ' +
         '</div>\n ' +
         '<% } else { %>' +
-        '<div> Faça login para poder comentar </div>' +
+        '<div class="back-to-login"><a href="#" class="add-comment mt-sm btn btn-info btn-md">Para participar, você precisa estar logado</a></div>' +
         '<% } %>' +
     '</div>\n' +
 '</div>'

@@ -92,4 +92,18 @@ jQuery("document").ready(function ($) {
             scrollTop: $(element).offset().top - $('.menu-topo-mc').outerHeight()
         }, 500);
     }
+
+    function back_to_login($) {
+        var offset = 220;
+        var duration = 500;
+        $('.back-to-login').click(function(event) {
+            event.preventDefault();
+            $('html, body').animate({
+                scrollTop: 0
+            }, duration);
+            return false;
+        });
+    }
+    //Chama o back to login
+    back_to_login($);
 });
