@@ -23,6 +23,9 @@
 	 */
 	include(plugin_dir_path(__FILE__) . 'cpt-texto-em-debate.php');
 
+	/** Widget para exibição na capa */
+	include(plugin_dir_path(__FILE__) . 'comment-front-widget.php');
+
 	class CTLT_WP_Side_Comments
 	{
 
@@ -1066,6 +1069,7 @@
 
         private function parseComment($comment){
             return array(
+				'id' => $comment->comment_ID,
                 'author' => $comment->comment_author,
                 'comment_text' => $comment->comment_content,
                 'date' => $this->getFriendlyCommentTime($comment)
