@@ -95,6 +95,9 @@
 
             // Get the proper template for post type texto-em-debate
 			add_filter( 'single_template', array($this,'get_texto_em_debate_template'));
+
+			//Set up searchable area
+			add_filter('the_content', array($this, 'addSearchableClassesToContent'), 51);
 		}/* __construct() */
 
 		/**
@@ -232,7 +235,22 @@
 					}
 				}
 
-				return $dom->__toString();
+				return $dom->save();
+
+			}
+			return $content;
+		}
+
+		public function addSearchableClassesToContent($content)
+		{
+			if ($this->get_current_post_type() == "texto-em-debate" && $content) {
+				$dom = new simple_html_dom($content);
+
+				foreach ($dom->childNodes() as $node) {
+					$node->innertext = '<span class="searchable-content">' . $node->innertext . '</span>';
+				}
+
+				return $dom->save();
 
 			}
 			return $content;
