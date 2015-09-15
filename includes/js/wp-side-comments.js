@@ -63,7 +63,9 @@ jQuery(document).ready(function ($) {
             parent = $(section).find('.comments-wrapper > .comment-form');
         }
 
-        if (comment.comment.trim().length>0) {
+        var commentText = comment.comment.replace(/&nbsp;/g,' ');
+
+        if (commentText.trim().length>0) {
             $.ajax({
                 url: ajaxURL,
                 dataType: 'json',
