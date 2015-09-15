@@ -6,8 +6,14 @@ jQuery("document").ready(function ($) {
     var menutop = $('.menu-topo-mc');
     var position = menutop.offset().top;
 
+    scrollToHash();
+
+    if ("onhashchange" in window) {
+        window.onhashchange = scrollToHash;
+    }
+
     $(window).scroll(function () {
-        var fixing = ($(this).scrollTop() > position) ? true : false;
+        var fixing = $(this).scrollTop() > position;
         menutop.toggleClass("fixed-top-mc", fixing);
     });
 
@@ -87,9 +93,23 @@ jQuery("document").ready(function ($) {
         scrollTo(element);
     }
 
+    function scrollToHash(){
+        var urlHash = window.location.href.split("#")[1];
+        if (urlHash && $('#' + urlHash).length) {
+            scrollTo($('#' + urlHash));
+        }
+    }
+
     function scrollTo(element) {
+        var finalScroll = $(element).offset().top;
+        if($(menutop).hasClass('fixed-top-mc')){
+            finalScroll -= $(menutop).outerHeight(true);
+        }else{
+            finalScroll -= $(menutop).outerHeight(true)*2;
+        }
+
         $('body,html').animate({
-            scrollTop: $(element).offset().top - $('.menu-topo-mc').outerHeight()
+            scrollTop: finalScroll
         }, 500);
     }
 
