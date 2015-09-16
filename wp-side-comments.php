@@ -117,7 +117,6 @@
             }
 
             wp_register_style('side-comments-style', CTLT_WP_SIDE_COMMENTS_PLUGIN_URL . 'includes/css/side-comments-full.css');
-            wp_register_style('texto-em-debate-style', CTLT_WP_SIDE_COMMENTS_PLUGIN_URL . 'includes/css/texto-em-debate.css');
 
             wp_register_script('side-comments-script', CTLT_WP_SIDE_COMMENTS_PLUGIN_URL . 'includes/js/side-comments.js', array('jquery'));
             wp_register_script('wp-side-comments-script', CTLT_WP_SIDE_COMMENTS_PLUGIN_URL . 'includes/js/wp-side-comments.js', array('jquery', 'side-comments-script'), null, true);
