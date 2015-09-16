@@ -1,6 +1,7 @@
 <?php $select = wp_side_comments_get_toc(get_the_content()); ?>
 <div class="menu-topo-mc">
-        <div class="clearfix">
+    <div class="row">
+        <div class="container">
             <div class="col-md-6 mt-sm">
                 <?= $select ?>
             </div>
@@ -26,4 +27,5 @@
                 </div>
             </div>
         </div>
+    </div>
 </div>
