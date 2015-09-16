@@ -12,6 +12,7 @@ jQuery(document).ready(function ($) {
     var postID = commentsData.postID;
     var ajaxURL = commentsData.ajaxURL;
     var containerSelector = commentsData.containerSelector;
+    var allowUserInteraction = commentsData.allowUserInteraction;
 
     var currentUser = null;
 
@@ -43,7 +44,7 @@ jQuery(document).ready(function ($) {
     }
 
     // Then, create a new SideComments instance, passing in the wrapper element and the optional the current user and any existing comments.
-    sideComments = new SideComments(containerSelector, currentUser, formattedCommentData);
+    sideComments = new SideComments(containerSelector, currentUser, formattedCommentData, allowUserInteraction);
 
     // http://stackoverflow.com/questions/9329446/how-to-do-for-each-over-an-array-in-javascript
     function arrayHasOwnIndex(array, prop) {
@@ -241,6 +242,7 @@ jQuery(document).ready(function ($) {
             var post = $.post(
                 ajaxURL, {
                     action: 'comment_vote_callback',
+                    post_id: postID,
                     vote: value,
                     comment_id: comment_id,
                     vote_nonce: voting_nonce

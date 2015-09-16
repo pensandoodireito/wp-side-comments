@@ -152,6 +152,8 @@
 
             $data['containerSelector'] = apply_filters('wp_side_comments_container_css_selector', '.commentable-container');
 
+			$data['allowUserInteraction'] = comments_open();
+
             wp_localize_script('wp-side-comments-script', 'commentsData', $data);
 
         }/* wp_enqueue_scripts__loadScriptsAndStyles() */
@@ -587,6 +589,12 @@
 				));
 			}
 
+			if (!comments_open($postID)) {
+				wp_send_json_error(array(
+					'error_message' => __('As interações com este texto estão desabilitadas no momento.', 'wp-side-comments')
+				));
+			}
+
 			$commentApproval = apply_filters('wp_side_comments_default_comment_approved_status', 1);
 
 			// The data we need for wp_insert_comment
@@ -731,21 +739,12 @@
 
 		private function weAreOnAValidScreen()
 		{
-
 			// We don't have anything for the admin at the moment and comments are only on a single
 			if( is_admin() || !is_singular() ){
 				return false;
 			}
 
-			// Ensure comments are open on the post we're on
-			global $post;
-
-			if( ! comments_open( $post->ID ) ){
-				return false;
-			}
-
 			return true;
-
 		}/* weAreOnAValidScreen() */
 
 
@@ -834,7 +833,8 @@
         {
             check_ajax_referer('side_comments_voting_nonce', 'vote_nonce');
 
-            $commentID = absint($_POST['comment_id']);
+			$postID = absint($_POST['post_id']);
+			$commentID = absint($_POST['comment_id']);
             $vote = $_POST['vote'];
 
             if (!in_array($vote, array('upvote', 'downvote'))) {
@@ -846,6 +846,12 @@
 
                 wp_send_json_error($return);
             }
+
+			if (!comments_open($postID)) {
+				wp_send_json_error(array(
+					'error_message' => __('As interações com este texto estão desabilitadas no momento.', 'wp-side-comments')
+				));
+			}
 
             $result = $this->commentVote($this->visitor->getId(), $commentID, $vote);
 
