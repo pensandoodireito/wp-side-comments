@@ -7,9 +7,13 @@
             <div class="col-md-3 mt-sm">
                 <div class="input-group">
                     <input id="txt-texto-em-debate" type="text" class="form-control" placeholder="Busque na página">
+                    <span class="clear-input-btn hidden">
+                        <i class="fa fa-times"></i>
+                    </span>
                     <span class="input-group-btn">
-                    <button id="btn-search-texto-em-debate" class="btn btn-default" type="button"><i
-                            class="fa fa-search"></i></button>
+                        <button id="btn-search-texto-em-debate" class="btn btn-default" type="button">
+                            <i class="fa fa-search"></i>
+                        </button>
                     </span>
                 </div>
             </div>
