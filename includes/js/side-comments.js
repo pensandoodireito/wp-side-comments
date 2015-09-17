@@ -3357,93 +3357,11 @@ require.register("side-comments/js/helpers/mobile-check.js", function (exports, 
 
 
 require.register("side-comments/templates/section.html", function (exports, require, module) {
-    module.exports =
-'<div class="side-comment <%= sectionClasses %>">\n '+
-    '<a href="#" class="marker">\n <span><%= comments.length %></span>\n  </a>\n  \n '+
-    '<div class="comments-wrapper">\n '+
-        '<div class="comments-header clearfix">\n '+
-        '<div class="pull-left">\n '+
-            '<h5 class="font-roboto titulo-comments"><strong>Comentários deste trecho</strong></h5>\n '+
-        '</div>\n ' +
-            '<div class="pull-right close-btn">\n '+
-                '<i class="fa fa-times" onClick="document.body.click();"></i>'+
-            '</div>\n ' +
-        '</div>\n ' +
-        '<div class="clearfix comments-estructure">\n '+
-            '<ul class="comments" data-root-id="0">\n '+
-                '<% _.each(comments, function( comment ){ %>\n '+
-                    '<%= _.template(commentTemplate, { comment: comment, currentUser: currentUser, allowUserInteraction: allowUserInteraction }) %>\n '+
-                    '<% }) %>\n ' +
-            '</ul>\n \n ' +
-        '</div>\n ' +
-        '<% if (!allowUserInteraction){ %>\n ' +
-            '<div class="user-interaction-disabled">As interações (comentários e votação) com este texto estão fechadas ou já se encerraram.</div>' +
-        '<% } else if (currentUser){ %>\n ' +
-            '<a href="#" class="add-comment mt-sm btn btn-success btn-md" data-parent="0" data-comment="">Deixe seu comentário</a>\n \n '+
-
-            '<div class="comment-form" data-parent="0" data-comment="">\n '+
-                '<p class="author-name">\n <%= currentUser.name %>\n        </p>\n ' +
-                '<div class="comment-box" contenteditable="true" data-placeholder-content="Deixe seu comentário">' +
-                '</div>\n ' +
-                '<div class="ml-md mt-sm">\n ' +
-                    '<a href="#" class="action-link post btn btn-default" data-parent="0" data-comment="">Enviar</a>\n ' +
-                    '<a href="#" class="action-link cancel btn btn-default" data-parent="0" data-comment="">Cancelar</a>\n ' +
-                '</div>\n ' +
-            '</div>\n ' +
-        '<% } else { %>' +
-            '<div class="back-to-login"><a href="#" class="add-comment mt-sm btn btn-info btn-md">Para participar, você precisa estar logado</a></div>' +
-        '<% } %>' +
-    '</div>\n' +
-'</div>'
-    ;
+    module.exports = templates.section;
 });
 
 require.register("side-comments/templates/comment.html", function (exports, require, module) {
-    module.exports = 
-'<li class="clearfix comment-main" data-comment-id="<%= comment.commentID %>" data-parent-id="<%= comment.parentID%>">\n  ' +
-    '<div class="clearfix">\n ' +
-        '<div class="comentario-fill">\n  ' +
-            '<p class="author-name">\n<%= comment.authorName %>\n</p>\n ' +
-            '<p class="comment-time">\n    <%= comment.time %>\n  </p>\n ' +
-            '<p class="comment">\n    <%= comment.comment %>\n  </p>\n ' +
-                '<% if (currentUser && comment.authorId === currentUser.id){ %>\n ' +
-                    //'<p><a href="#" class="fontsize-sm red">Deletar</a></p>\n ' +
-                '<% } %>\n' +
-            '<div class="comment-weight-container clearfix">\n' +
-                //'<span id="comment-weight-value-<%= comment.commentID %>"><%= comment.karma %></span>\n ' +
-
-                '<div class="mt-xs">\n' +
-                    '<% if (allowUserInteraction){ %>\n ' +
-                        '<a data-comment-id="<%= comment.commentID %>" class="vote-up vote-btn btn btn-default btn-xs fontsize-sm text-green" href="#"><i class="fa fa-thumbs-o-up"></i> Concordo <span id="comment-upvote-value-<%= comment.commentID %>"><%= comment.upvotes %></span></a> \n ' +
-                        '<a data-comment-id="<%= comment.commentID %>" class="vote-down vote-btn btn btn-default btn-xs fontsize-sm red" href="#"><i class="fa fa-thumbs-o-down"></i> Discordo <span id="comment-downvote-value-<%= comment.commentID %>"><%= comment.downvotes %></span></a>\n ' +
-                    '<% } else { %>' +
-                        '<a disabled="true" class="btn btn-default btn-xs fontsize-sm text-green" href="#"><i class="fa fa-thumbs-o-up"></i> Concordaram <%= comment.upvotes %> </a> \n ' +
-                        '<a disabled="true" class="btn btn-default btn-xs fontsize-sm red" href="#"><i class="fa fa-thumbs-o-down"></i> Discordaram <%= comment.downvotes %> </a>\n ' +
-                    '<% } %>\n' +
-                '</div>\n ' +
-                '<% if (currentUser && allowUserInteraction){ %>\n ' +
-                '<div class="mt-xs">\n' +
-                    '<a href="#" class="add-reply fontsize-sm" data-parent="<%= comment.parentID%>" data-comment="<%= comment.commentID %>"> <i class="fa fa-comment-o"></i> Responder</a>\n \n  ' +
-                '</div>\n ' +   
-                '<% } %>\n' + 
-            '</div>\n ' +
-        '</div>\n  ' +
-    '</div>\n  ' +
-
-    '<% if (currentUser && allowUserInteraction){ %>\n' +
-        '<div class="comment-form clearfix" data-parent="<%= comment.parentID%>" data-comment="<%= comment.commentID %>">\n ' +
-            '<div class="comentario-fill">\n  ' +
-                '<p class="author-name">\n <%= currentUser.name %>\n </p>\n ' +
-                '<div class="comment-box" contenteditable="true" data-parent="<%= comment.parentID%>" data-comment="<%= comment.commentID %>" data-placeholder-content="Responder">' +
-                '</div>\n ' +
-                '<div class="actions">\n ' +
-                    '<a href="#" class="action-link reply btn btn-default btn-sm text-blue mr-md" data-parent="<%= comment.parentID %>" data-comment="<%= comment.commentID %>">Enviar</a>\n ' +
-                    '<a href="#" class="action-link cancel btn btn-default btn-sm red" data-parent="<%= comment.parentID %>" data-comment="<%= comment.commentID %>">Cancelar</a>\n ' +
-                '</div>\n ' +
-            '</div>\n ' +
-        '</div>\n ' +
-    '<% } %>' +
-'</li>';
+    module.exports = templates.comment;
 });
 
 

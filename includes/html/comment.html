@@ -1,0 +1,59 @@
+<li class="clearfix comment-main" data-comment-id="<%= comment.commentID %>" data-parent-id="<%= comment.parentID%>">
+    <div class="clearfix">
+        <div class="comentario-fill">
+            <p class="author-name"><%= comment.authorName %></p>
+
+            <p class="comment-time"> <%= comment.time %> </p>
+
+            <p class="comment"> <%= comment.comment %> </p>
+            <% if (currentUser && comment.authorId === currentUser.id){ %>
+            <!--//'<p><a href="#" class="fontsize-sm red">Deletar</a></p>-->
+            <% } %>
+            <div class="comment-weight-container clearfix">
+                <!--//<span id="comment-weight-value-<%= comment.commentID %>"><%= comment.karma %></span>-->
+
+                <div class="mt-xs">
+                    <% if (allowUserInteraction){ %>
+                    <a data-comment-id="<%= comment.commentID %>"
+                       class="vote-up vote-btn btn btn-default btn-xs fontsize-sm text-green" href="#"><i
+                            class="fa fa-thumbs-o-up"></i> Concordo <span
+                            id="comment-upvote-value-<%= comment.commentID %>"><%= comment.upvotes %></span></a>
+                    <a data-comment-id="<%= comment.commentID %>"
+                       class="vote-down vote-btn btn btn-default btn-xs fontsize-sm red" href="#"><i
+                            class="fa fa-thumbs-o-down"></i> Discordo <span
+                            id="comment-downvote-value-<%= comment.commentID %>"><%= comment.downvotes %></span></a>
+                    <% } else { %>
+                    <a disabled="true" class="btn btn-default btn-xs fontsize-sm text-green" href="#"><i
+                            class="fa fa-thumbs-o-up"></i> Concordaram <%= comment.upvotes %> </a>
+                    <a disabled="true" class="btn btn-default btn-xs fontsize-sm red" href="#"><i
+                            class="fa fa-thumbs-o-down"></i> Discordaram <%= comment.downvotes %> </a>
+                    <% } %>
+                </div>
+                <% if (currentUser && allowUserInteraction){ %>
+                <div class="mt-xs">
+                    <a href="#" class="add-reply fontsize-sm" data-parent="<%= comment.parentID%>"
+                       data-comment="<%= comment.commentID %>"> <i class="fa fa-comment-o"></i> Responder</a>
+                </div>
+                <% } %>
+            </div>
+        </div>
+    </div>
+
+    <% if (currentUser && allowUserInteraction){ %>
+    <div class="comment-form clearfix" data-parent="<%= comment.parentID%>" data-comment="<%= comment.commentID %>">
+        <div class="comentario-fill">
+            <p class="author-name"> <%= currentUser.name %> </p>
+
+            <div class="comment-box" contenteditable="true" data-parent="<%= comment.parentID%>"
+                 data-comment="<%= comment.commentID %>" data-placeholder-content="Responder">
+            </div>
+            <div class="actions">
+                <a href="#" class="action-link reply btn btn-default btn-sm text-blue mr-md"
+                   data-parent="<%= comment.parentID %>" data-comment="<%= comment.commentID %>">Enviar</a>
+                <a href="#" class="action-link cancel btn btn-default btn-sm red" data-parent="<%= comment.parentID %>"
+                   data-comment="<%= comment.commentID %>">Cancelar</a>
+            </div>
+        </div>
+    </div>
+    <% } %>
+</li>
