@@ -80,7 +80,7 @@
     ul.comments li:first-child,
     .comment-form:first-child,
     .comment-form:last-child {
-        border: none;
+        //border: none;
     }
     * {
         -webkit-box-sizing: border-box;
@@ -151,17 +151,22 @@
         .comments {
             list-style: none;
             padding: 0;
-            margin: 0 5px 15px 0;
-            display: none;
+            margin: 0;
             width: 100%;
+
             li {
                 width: 100%;
                 overflow: hidden;
-                padding: 0 10px;
+                padding: 10px 10px 0 10px;
+                margin-top: 15px;
+                border-left: 1px dashed #ccc;
+                border-top: 1px dashed #ccc;;
                 .comentario-fill {
                     width: 100%;
-                    border-bottom: 1px solid #ccc;
-                    padding: 15px 0px;
+                    padding: 10px 0px;
+                    :last-child{
+                        border-bottom: none;
+                    }
                 }
             }
             .comment {
