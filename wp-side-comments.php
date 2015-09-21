@@ -16,19 +16,19 @@ if (!defined('ABSPATH')) {
 define('CTLT_WP_SIDE_COMMENTS_PLUGIN_URL', plugin_dir_url(__FILE__));
 define('CTLT_WP_SIDE_COMMENTS_PLUGIN_PATH', plugin_dir_path(__FILE__));
 
-//includes comment walker classes
+//includes side wp comments class
 require_once CTLT_WP_SIDE_COMMENTS_PLUGIN_PATH . 'classes/class-wp-side-comments.php';
 
 //includes required classes for comment voting
 require_once CTLT_WP_SIDE_COMMENTS_PLUGIN_PATH . 'classes/class-visitor.php';
 
-//Inclui o arquivo de configurações do Custom Post Type "Texto em Debate'
-include(CTLT_WP_SIDE_COMMENTS_PLUGIN_PATH . 'cpt-texto-em-debate.php');
+//Include the Custom Post Type "Texto em Debate"
+require_once CTLT_WP_SIDE_COMMENTS_PLUGIN_PATH . 'classes/class-texto-em-debate-post-type.php';
 
 // Widget para exibição na capa
 include(CTLT_WP_SIDE_COMMENTS_PLUGIN_PATH . 'classes/comment-front-widget.php');
 
-function wp_side_comments_init()
+function wpsc_init_side_comments()
 {
     global $CTLT_WP_Side_Comments;
     $CTLT_WP_Side_Comments = new CTLT_WP_Side_Comments();
@@ -45,4 +45,12 @@ function wp_side_comments_init()
     }
 }
 
-add_action('plugins_loaded', 'wp_side_comments_init');
+add_action('plugins_loaded', 'wpsc_init_side_comments');
+
+function wpsc_init_texto_em_debate()
+{
+    global $Texto_Em_Debate_Post_Type;
+    $Texto_Em_Debate_Post_Type = new Texto_Em_Debate_Post_Type();
+}
+
+add_action('init', 'wpsc_init_texto_em_debate');
