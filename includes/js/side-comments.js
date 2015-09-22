@@ -3377,8 +3377,8 @@ require.register("side-comments/templates/section.html", function (exports, requ
             '<div class="comment-box" contenteditable="true" data-placeholder-content="Deixe seu comentário">' +
             '</div>\n ' +
             '<div class="ml-md mt-sm">\n ' +
-                '<a href="#" class="action-link post btn btn-default" data-parent="0" data-comment="">Enviar</a>\n ' +
-                '<a href="#" class="action-link cancel btn btn-default" data-parent="0" data-comment="">Cancelar</a>\n ' +
+                '<a href="#" class="action-link post btn btn-default text-blue" data-parent="0" data-comment="">Enviar</a>\n ' +
+                '<a href="#" class="action-link cancel btn btn-default red" data-parent="0" data-comment="">Cancelar</a>\n ' +
             '</div>\n ' +
         '</div>\n ' +
         '<% } else { %>' +
