@@ -42,19 +42,22 @@ jQuery("document").ready(function ($) {
 
     function highlightText() {
         var text = $("#txt-texto-em-debate").val();
+        var searchable = $("span.searchable-content");
 
-        $(".commentable-container").removeHighlight();
+        searchable.removeHighlight();
         $(".total-highlight").html(0);
         $(".current-highlight").html(0);
 
         if (text.length > 0) {
-            $(".commentable-container").highlight(text);
+            searchable.highlight(text);
 
-            var highlights = $(".commentable-container").find(".highlight");
-            $(".total-highlight").html(highlights.length);
-            $(".current-highlight").html(1);
+            var highlights = searchable.find(".highlight");
+            if (highlights.length > 0) {
+                $(".total-highlight").html(highlights.length);
+                $(".current-highlight").html(1);
 
-            setCurrentHighlight(highlights.first());
+                setCurrentHighlight(highlights.first());
+            }
         }
     }
 
