@@ -537,6 +537,10 @@ require.register("side-comments/js/main.js", function (exports, require, module)
     SideComments.prototype.bodyClick = function (event) {
         var $target = $(event.target);
 
+        if($target.hasClass('commentable-section')){
+            return;
+        }
+
         // We do a check on $('body') existing here because if the $target has
         // no parent body then it's because it belongs to a deleted comment and
         // we should NOT hide the SideComments.
@@ -606,6 +610,7 @@ require.register("side-comments/js/section.js", function (exports, require, modu
 
         this.id = $el.data('section-id');
 
+        this.$el.on(this.clickEventName, _.bind(this.showComment, this));
         this.$el.on(this.clickEventName, '.side-comment .marker', _.bind(this.markerClick, this));
         this.$el.on(this.clickEventName, '.side-comment .add-comment', _.bind(this.addCommentClick, this));
         this.$el.on(this.clickEventName, '.side-comment .add-reply', _.bind(this.addReplyClick, this));
@@ -614,6 +619,14 @@ require.register("side-comments/js/section.js", function (exports, require, modu
         this.$el.on(this.clickEventName, '.side-comment .cancel', _.bind(this.cancelCommentClick, this));
         this.$el.on(this.clickEventName, '.side-comment .delete', _.bind(this.deleteCommentClick, this));
         this.render();
+    }
+
+    Section.prototype.showComment = function( event ){
+        event.preventDefault();
+        var target = $(event.target);
+        if(target.hasClass('commentable-section')){
+            this.select();
+        }
     }
 
     /**

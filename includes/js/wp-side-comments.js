@@ -196,7 +196,7 @@ jQuery(document).ready(function ($) {
     //Removes .active from p.commentable-section when the cursor is click anywhere else but .commment-wrapper. Used to mimic same nature of side comments
     $('#content, html').on('click', function (e) {
         var clicked = $(e.target); // get the element clicked
-        if (clicked.is('.comments-wrapper, .marker') || clicked.parents().is('.comments-wrapper, .marker')) {
+        if (clicked.is('.comments-wrapper, .marker') || clicked.parents().is('.comments-wrapper, .marker') || clicked.hasClass('commentable-section')) {
             return; // click happened within the dialog, do nothing here
         } else { // click was outside the dialog, so close it
             $(".commentable-section").removeClass("active");
