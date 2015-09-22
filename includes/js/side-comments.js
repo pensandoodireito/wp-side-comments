@@ -385,7 +385,7 @@ require.register("side-comments/js/main.js", function (exports, require, module)
      *
      * TODO: **GIVE EXAMPLE OF STRUCTURE HERE***
      */
-    function SideComments(el, currentUser, existingComments) {
+    function SideComments(el, currentUser, existingComments, allowInteractions) {
         this.$el = $(el);
         this.$body = $('body');
         this.eventPipe = eventPipe;
@@ -394,6 +394,8 @@ require.register("side-comments/js/main.js", function (exports, require, module)
         this.existingComments = _.cloneDeep(existingComments) || [];
         this.sections = [];
         this.activeSection = null;
+        this.allowInteractions = allowInteractions;
+
 
         // Event bindings
         this.eventPipe.on('showComments', _.bind(this.showComments, this));
@@ -407,22 +409,22 @@ require.register("side-comments/js/main.js", function (exports, require, module)
         this.initialize(this.existingComments);
     }
 
-// Mix in Emitter
+    // Mix in Emitter
     Emitter(SideComments.prototype);
 
-/**
- * Adds the comments beside each commentable section.
- */
-SideComments.prototype.initialize = function (existingComments) {
-  _.each(this.$el.find('.commentable-section'), function (section) {
-    var $section = $(section);
-    var sectionId = $section.data('section-id').toString();
-    var sectionComments = _.find(this.existingComments, {sectionId: sectionId});
+    /**
+     * Adds the comments beside each commentable section.
+     */
+    SideComments.prototype.initialize = function (existingComments) {
+        _.each(this.$el.find('.commentable-section'), function (section) {
+            var $section = $(section);
+            var sectionId = $section.data('section-id').toString();
+            var sectionComments = _.find(this.existingComments, {sectionId: sectionId});
 
-      this.sections.push(new Section(this.eventPipe, $section, this.currentUser, sectionComments));
+            this.sections.push(new Section(this.eventPipe, $section, this.currentUser, sectionComments, this.allowInteractions));
 
-  }, this);
-};
+        }, this);
+    };
 
     /**
      * Shows the side comments.
@@ -594,12 +596,13 @@ require.register("side-comments/js/section.js", function (exports, require, modu
      * @param {Object} eventPipe The Emitter object used for passing around events.
      * @param {Array} comments   The array of comments for this section. Optional.
      */
-    function Section(eventPipe, $el, currentUser, comments) {
+    function Section(eventPipe, $el, currentUser, comments, allowUserInteraction) {
         this.eventPipe = eventPipe;
         this.$el = $el;
         this.comments = comments ? comments.comments : [];
         this.currentUser = currentUser || null;
         this.clickEventName = mobileCheck() ? 'touchstart' : 'click';
+        this.allowUserInteraction = allowUserInteraction;
 
         this.id = $el.data('section-id');
 
@@ -763,8 +766,10 @@ require.register("side-comments/js/section.js", function (exports, require, modu
         this.comments.push(comment);
         var newCommentHtml = _.template(CommentTemplate, {
             comment: comment,
-            currentUser: this.currentUser
+            currentUser: this.currentUser,
+            allowUserInteraction: this.allowUserInteraction
         });
+
         if (comment.parentID != "0") {
             var parentID = comment.parentID,
                 parentOfCurrent = this.$el.find('li[data-comment-id="'+parentID+'"]');
@@ -885,7 +890,8 @@ require.register("side-comments/js/section.js", function (exports, require, modu
             commentTemplate: CommentTemplate,
             comments: this.comments,
             sectionClasses: this.sectionClasses(),
-            currentUser: this.currentUser
+            currentUser: this.currentUser,
+            allowUserInteraction: this.allowUserInteraction
         }));
 
         $(sideCommentWrap.find(".comments li")).each(function (key, com) {
@@ -913,6 +919,7 @@ require.register("side-comments/js/section.js", function (exports, require, modu
 
     module.exports = Section;
 });
+
 require.register("side-comments/js/vendor/lodash-custom.js", function (exports, require, module) {
     /**
      * @license
@@ -3365,24 +3372,26 @@ require.register("side-comments/templates/section.html", function (exports, requ
         '<div class="clearfix comments-estructure">\n '+
             '<ul class="comments" data-root-id="0">\n '+
                 '<% _.each(comments, function( comment ){ %>\n '+
-                    '<%= _.template(commentTemplate, { comment: comment, currentUser: currentUser }) %>\n '+
+                    '<%= _.template(commentTemplate, { comment: comment, currentUser: currentUser, allowUserInteraction: allowUserInteraction }) %>\n '+
                     '<% }) %>\n ' +
             '</ul>\n \n ' +
         '</div>\n ' +
-        '<% if (currentUser){ %>\n ' +
-        '<a href="#" class="add-comment mt-sm btn btn-success btn-md" data-parent="0" data-comment="">Deixe seu comentário</a>\n \n '+
-        
-        '<div class="comment-form" data-parent="0" data-comment="">\n '+
-            '<p class="author-name">\n <%= currentUser.name %>\n        </p>\n ' +
-            '<div class="comment-box" contenteditable="true" data-placeholder-content="Deixe seu comentário">' +
+        '<% if (!allowUserInteraction){ %>\n ' +
+            '<div class="user-interaction-disabled">As interações (comentários e votação) com este texto estão fechadas ou já se encerraram.</div>' +
+        '<% } else if (currentUser){ %>\n ' +
+            '<a href="#" class="add-comment mt-sm btn btn-success btn-md" data-parent="0" data-comment="">Deixe seu comentário</a>\n \n '+
+
+            '<div class="comment-form" data-parent="0" data-comment="">\n '+
+                '<p class="author-name">\n <%= currentUser.name %>\n        </p>\n ' +
+                '<div class="comment-box" contenteditable="true" data-placeholder-content="Deixe seu comentário">' +
+                '</div>\n ' +
+                '<div class="ml-md mt-sm">\n ' +
+                    '<a href="#" class="action-link post btn btn-default" data-parent="0" data-comment="">Enviar</a>\n ' +
+                    '<a href="#" class="action-link cancel btn btn-default" data-parent="0" data-comment="">Cancelar</a>\n ' +
+                '</div>\n ' +
             '</div>\n ' +
-            '<div class="ml-md mt-sm">\n ' +
-                '<a href="#" class="action-link post btn btn-default" data-parent="0" data-comment="">Enviar</a>\n ' +
-                '<a href="#" class="action-link cancel btn btn-default" data-parent="0" data-comment="">Cancelar</a>\n ' +
-            '</div>\n ' +
-        '</div>\n ' +
         '<% } else { %>' +
-        '<div class="back-to-login"><a href="#" class="add-comment mt-sm btn btn-info btn-md">Para participar, você precisa estar logado</a></div>' +
+            '<div class="back-to-login"><a href="#" class="add-comment mt-sm btn btn-info btn-md">Para participar, você precisa estar logado</a></div>' +
         '<% } %>' +
     '</div>\n' +
 '</div>'
@@ -3398,16 +3407,21 @@ require.register("side-comments/templates/comment.html", function (exports, requ
             '<p class="comment-time">\n    <%= comment.time %>\n  </p>\n ' +
             '<p class="comment">\n    <%= comment.comment %>\n  </p>\n ' +
                 '<% if (currentUser && comment.authorId === currentUser.id){ %>\n ' +
-                    '<p><a href="#" class="fontsize-sm red">Deletar</a></p>\n ' +
+                    //'<p><a href="#" class="fontsize-sm red">Deletar</a></p>\n ' +
                 '<% } %>\n' +
             '<div class="comment-weight-container clearfix">\n' +
                 //'<span id="comment-weight-value-<%= comment.commentID %>"><%= comment.karma %></span>\n ' +
 
                 '<div class="mt-xs">\n' +
-                    '<a data-comment-id="<%= comment.commentID %>" class="vote-up vote-btn btn btn-default btn-xs fontsize-sm text-green" href="#"><i class="fa fa-thumbs-o-up"></i> Concordo <span id="comment-upvote-value-<%= comment.commentID %>"><%= comment.upvotes %></span></a> \n ' +
-                    '<a data-comment-id="<%= comment.commentID %>" class="vote-down vote-btn btn btn-default btn-xs fontsize-sm red" href="#"><i class="fa fa-thumbs-o-down"></i> Discordo <span id="comment-downvote-value-<%= comment.commentID %>"><%= comment.downvotes %></span></a>\n ' +
+                    '<% if (allowUserInteraction){ %>\n ' +
+                        '<a data-comment-id="<%= comment.commentID %>" class="vote-up vote-btn btn btn-default btn-xs fontsize-sm text-green" href="#"><i class="fa fa-thumbs-o-up"></i> Concordo <span id="comment-upvote-value-<%= comment.commentID %>"><%= comment.upvotes %></span></a> \n ' +
+                        '<a data-comment-id="<%= comment.commentID %>" class="vote-down vote-btn btn btn-default btn-xs fontsize-sm red" href="#"><i class="fa fa-thumbs-o-down"></i> Discordo <span id="comment-downvote-value-<%= comment.commentID %>"><%= comment.downvotes %></span></a>\n ' +
+                    '<% } else { %>' +
+                        '<a disabled="true" class="btn btn-default btn-xs fontsize-sm text-green" href="#"><i class="fa fa-thumbs-o-up"></i> Concordaram <%= comment.upvotes %> </a> \n ' +
+                        '<a disabled="true" class="btn btn-default btn-xs fontsize-sm red" href="#"><i class="fa fa-thumbs-o-down"></i> Discordaram <%= comment.downvotes %> </a>\n ' +
+                    '<% } %>\n' +
                 '</div>\n ' +
-                '<% if (currentUser){ %>\n ' +
+                '<% if (currentUser && allowUserInteraction){ %>\n ' +
                 '<div class="mt-xs">\n' +
                     '<a href="#" class="add-reply fontsize-sm" data-parent="<%= comment.parentID%>" data-comment="<%= comment.commentID %>"> <i class="fa fa-comment-o"></i> Responder</a>\n \n  ' +
                 '</div>\n ' +   
@@ -3416,19 +3430,18 @@ require.register("side-comments/templates/comment.html", function (exports, requ
         '</div>\n  ' +
     '</div>\n  ' +
 
-    '<% if (currentUser){ %>\n     ' +
-
-    '<div class="comment-form clearfix" data-parent="<%= comment.parentID%>" data-comment="<%= comment.commentID %>">\n ' +
-        '<div class="comentario-fill">\n  ' +
-            '<p class="author-name">\n <%= currentUser.name %>\n </p>\n ' +
-            '<div class="comment-box" contenteditable="true" data-parent="<%= comment.parentID%>" data-comment="<%= comment.commentID %>" data-placeholder-content="Responder">' +
-            '</div>\n ' +
-            '<div class="actions">\n ' +
-                '<a href="#" class="action-link reply btn btn-default btn-sm text-blue mr-md" data-parent="<%= comment.parentID %>" data-comment="<%= comment.commentID %>">Enviar</a>\n ' +
-                '<a href="#" class="action-link cancel btn btn-default btn-sm red" data-parent="<%= comment.parentID %>" data-comment="<%= comment.commentID %>">Cancelar</a>\n ' +
+    '<% if (currentUser && allowUserInteraction){ %>\n' +
+        '<div class="comment-form clearfix" data-parent="<%= comment.parentID%>" data-comment="<%= comment.commentID %>">\n ' +
+            '<div class="comentario-fill">\n  ' +
+                '<p class="author-name">\n <%= currentUser.name %>\n </p>\n ' +
+                '<div class="comment-box" contenteditable="true" data-parent="<%= comment.parentID%>" data-comment="<%= comment.commentID %>" data-placeholder-content="Responder">' +
+                '</div>\n ' +
+                '<div class="actions">\n ' +
+                    '<a href="#" class="action-link reply btn btn-default btn-sm text-blue mr-md" data-parent="<%= comment.parentID %>" data-comment="<%= comment.commentID %>">Enviar</a>\n ' +
+                    '<a href="#" class="action-link cancel btn btn-default btn-sm red" data-parent="<%= comment.parentID %>" data-comment="<%= comment.commentID %>">Cancelar</a>\n ' +
+                '</div>\n ' +
             '</div>\n ' +
         '</div>\n ' +
-    '</div>\n ' +
     '<% } %>' +
 '</li>';
 });
