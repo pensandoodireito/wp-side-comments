@@ -71,7 +71,7 @@ var SecaoView = Backbone.View.extend({
             var commentArea = sectionArea.find('.list-group');
             comentario = new ComentarioView({model: item, el: commentArea});
             comentario.render();
-            sectionArea.find('a').attr('href', commentFrontParams.post_url + '#' + _this.model.attributes.id);
+            sectionArea.find('a').attr('href', commentFrontParams.post_url + '#commentable-section-' + _this.model.attributes.id);
         });
 
         return this;
