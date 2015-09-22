@@ -157,7 +157,11 @@
 
 			$data['allowUserInteraction'] = comments_open();
 
-            wp_localize_script('wp-side-comments-script', 'commentsData', $data);
+			$templates['comment'] = file_get_contents(plugin_dir_path(__FILE__) . 'includes/html/comment.html');
+			$templates['section'] = file_get_contents(plugin_dir_path(__FILE__) . 'includes/html/section.html');
+
+			wp_localize_script('side-comments-script', 'templates', $templates);
+			wp_localize_script('wp-side-comments-script', 'commentsData', $data);
 
         }/* wp_enqueue_scripts__loadScriptsAndStyles() */
 
