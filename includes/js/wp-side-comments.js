@@ -203,10 +203,18 @@ jQuery(document).ready(function ($) {
     });
 
     //When clicked browser scrolls to top of item
-    $(".marker").click(function () {
-		var previousSelectedHeight = $(".commentable-section.active").outerHeight()
-        $('html, body').animate({
-            scrollTop: $(this).parent().offset().top - $('.menu-topo-mc').outerHeight() - previousSelectedHeight
+    $(".marker").on('click', function (e){
+        var target = $(e.target);
+		var sectionSelected = target.parents(".commentable-section.active");
+        var menuTopo = $('.menu-topo-mc');
+        var scrollPos = sectionSelected.offset().top;
+        if(menuTopo.hasClass('fixed-top-mc')){
+            scrollPos -= menuTopo.outerHeight(true);
+        }else{
+            scrollPos -= menuTopo.outerHeight(true)*2;
+        }
+        $('body,html').animate({
+            scrollTop: scrollPos
         }, 500);
     });
 
