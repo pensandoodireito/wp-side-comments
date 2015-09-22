@@ -85,7 +85,7 @@ jQuery(document).ready(function ($) {
                     if (response.success === false) {
                         var erro = $('.hidden > .alert-warning').clone();
                         erro.find('p').html(response.data.error_message);
-                        erro.hide().appendTo(parent).fadeIn(1000).delay(5000).slideUp(1000, function () {
+                        erro.hide().insertBefore(parent).fadeIn(1000).delay(5000).slideUp(1000, function () {
                             $(this).remove();
                         });
                     } else {
@@ -108,7 +108,7 @@ jQuery(document).ready(function ($) {
                 error: function (jqXHR, textStatus, errorThrown) {
                     var erro = $('.hidden > .alert-danger').clone();
                     erro.find('p').html("Falha ao adicionar o comentário. Tente novamente mais tarde");
-                    erro.hide().appendTo(parent).fadeIn(1000).delay(5000).slideUp(1000, function () {
+                    erro.hide().insertBefore(parent).fadeIn(1000).delay(5000).slideUp(1000, function () {
                         $(this).remove();
                     });
 
@@ -118,7 +118,7 @@ jQuery(document).ready(function ($) {
         }else{
             var erro = $('.hidden > .alert-warning').clone();
             erro.find('p').html("Você não pode enviar um comentário vazio.");
-            erro.hide().appendTo(parent).fadeIn(1000).delay(5000).slideUp(1000, function () {
+            erro.hide().insertBefore(parent).fadeIn(1000).delay(5000).slideUp(1000, function () {
                 $(this).remove();
             });
 
