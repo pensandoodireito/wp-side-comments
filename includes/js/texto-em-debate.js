@@ -34,7 +34,25 @@ jQuery("document").ready(function ($) {
         nextHighlight()
     });
 
+    $("span.clear-input-btn").click(function () {
+        $('#txt-texto-em-debate').val("").trigger('change');
+    });
+
+    $('#txt-texto-em-debate').change(function () {
+        if ($(this).val().length > 0) {
+            $("span.clear-input-btn").removeClass("hidden");
+        } else {
+            $("span.clear-input-btn").addClass("hidden");
+        }
+    });
+
     $('#txt-texto-em-debate').keyup(function (e) {
+        if ($(this).val().length > 0) {
+            $("span.clear-input-btn").removeClass("hidden");
+        } else {
+            $("span.clear-input-btn").addClass("hidden");
+        }
+
         if (e.keyCode == 13) {
             highlightText();
         }
@@ -96,7 +114,7 @@ jQuery("document").ready(function ($) {
         scrollTo(element);
     }
 
-    function scrollToHash(){
+    function scrollToHash() {
         var urlHash = window.location.href.split("#")[1];
         if (urlHash && $('#' + urlHash).length) {
             scrollTo($('#' + urlHash));
@@ -105,10 +123,10 @@ jQuery("document").ready(function ($) {
 
     function scrollTo(element) {
         var finalScroll = $(element).offset().top;
-        if($(menutop).hasClass('fixed-top-mc')){
+        if ($(menutop).hasClass('fixed-top-mc')) {
             finalScroll -= $(menutop).outerHeight(true);
-        }else{
-            finalScroll -= $(menutop).outerHeight(true)*2;
+        } else {
+            finalScroll -= $(menutop).outerHeight(true) * 2;
         }
 
         $('body,html').animate({
@@ -119,7 +137,7 @@ jQuery("document").ready(function ($) {
     function back_to_login($) {
         var offset = 220;
         var duration = 500;
-        $('.back-to-login').click(function(event) {
+        $('.back-to-login').click(function (event) {
             event.preventDefault();
             $('html, body').animate({
                 scrollTop: 0
@@ -127,6 +145,7 @@ jQuery("document").ready(function ($) {
             return false;
         });
     }
+
     //Chama o back to login
     back_to_login($);
 });
