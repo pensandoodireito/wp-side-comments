@@ -1,8 +1,19 @@
 // CSS's para a página de debate do texto
+
+//menu que se fixa no topo
 .menu-topo-mc {
     box-shadow: 0 0 7px 0 rgba(0, 0, 0, 0.3);
     background-color: #fff;
     padding: 0 0 15px 0;
+
+    span.clear-input-btn{
+        position: absolute;
+        right: 45px;
+        top: 20%;
+        color: #ccc;
+        z-index: 3;
+        cursor: pointer;
+    }
 }
 
 .fixed-top-mc {
@@ -13,6 +24,17 @@
     width: 100%;
 }
 
+// css da busca
+
+.highlight {
+    background-color: yellow
+}
+
+.highlight.current {
+    background-color: orange;
+}
+
+// box de comentário e texto
 .commentable-container {
     -webkit-transition: all 0.22s ease;
     transition: all 0.22s ease;
@@ -80,7 +102,7 @@
     ul.comments li:first-child,
     .comment-form:first-child,
     .comment-form:last-child {
-        border: none;
+        //border: none;
     }
     * {
         -webkit-box-sizing: border-box;
@@ -151,17 +173,22 @@
         .comments {
             list-style: none;
             padding: 0;
-            margin: 0 5px 15px 0;
-            display: none;
+            margin: 0;
             width: 100%;
+
             li {
                 width: 100%;
                 overflow: hidden;
-                padding: 0 10px;
+                padding: 10px 10px 0 10px;
+                margin-top: 15px;
+                border-left: 1px dashed #ccc;
+                border-top: 1px dashed #ccc;;
                 .comentario-fill {
                     width: 100%;
-                    border-bottom: 1px solid #ccc;
-                    padding: 15px 0px;
+                    padding: 10px 0px;
+                    :last-child{
+                        border-bottom: none;
+                    }
                 }
             }
             .comment {
@@ -308,7 +335,6 @@
     transform: translate(-220px, 0);
     transform: none;
     .side-comment.has-comments .marker {
-        display: none;
     }
 }
 

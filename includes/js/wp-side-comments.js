@@ -64,7 +64,9 @@ jQuery(document).ready(function ($) {
             parent = $(section).find('.comments-wrapper > .comment-form');
         }
 
-        if (comment.comment.trim().length>0) {
+        var commentText = comment.comment.replace(/&nbsp;/g,' ');
+
+        if (commentText.trim().length>0) {
             $.ajax({
                 url: ajaxURL,
                 dataType: 'json',
@@ -84,7 +86,7 @@ jQuery(document).ready(function ($) {
                     if (response.success === false) {
                         var erro = $('.hidden > .alert-warning').clone();
                         erro.find('p').html(response.data.error_message);
-                        erro.hide().appendTo(parent).fadeIn(1000).delay(5000).slideUp(1000, function () {
+                        erro.hide().insertBefore(parent).fadeIn(1000).delay(5000).slideUp(1000, function () {
                             $(this).remove();
                         });
                     } else {
@@ -107,7 +109,7 @@ jQuery(document).ready(function ($) {
                 error: function (jqXHR, textStatus, errorThrown) {
                     var erro = $('.hidden > .alert-danger').clone();
                     erro.find('p').html("Falha ao adicionar o comentário. Tente novamente mais tarde");
-                    erro.hide().appendTo(parent).fadeIn(1000).delay(5000).slideUp(1000, function () {
+                    erro.hide().insertBefore(parent).fadeIn(1000).delay(5000).slideUp(1000, function () {
                         $(this).remove();
                     });
 
@@ -117,7 +119,7 @@ jQuery(document).ready(function ($) {
         }else{
             var erro = $('.hidden > .alert-warning').clone();
             erro.find('p').html("Você não pode enviar um comentário vazio.");
-            erro.hide().appendTo(parent).fadeIn(1000).delay(5000).slideUp(1000, function () {
+            erro.hide().insertBefore(parent).fadeIn(1000).delay(5000).slideUp(1000, function () {
                 $(this).remove();
             });
 
@@ -180,12 +182,7 @@ jQuery(document).ready(function ($) {
         if (!$(this).parent().hasClass('active')) {
             var parent = $(this).parent().parent('p.commentable-section');
             parent.addClass('active');
-
-            $('body').bind('mousewheel', function(e) {
-                    var $div = parent.find('.comments-estructure');
-                    $div.scrollTop($div.scrollTop() - e.originalEvent.wheelDelta);
-                    return false;
-            });
+            
         } else {
             $(this).parent().parent('p.commentable-section').removeClass('active');
         }
@@ -194,7 +191,7 @@ jQuery(document).ready(function ($) {
     //Removes .active from p.commentable-section when the cursor is click anywhere else but .commment-wrapper. Used to mimic same nature of side comments
     $('#content, html').on('click', function (e) {
         var clicked = $(e.target); // get the element clicked
-        if (clicked.is('.comments-wrapper, .marker') || clicked.parents().is('.comments-wrapper, .marker')) {
+        if (clicked.is('.comments-wrapper, .marker') || clicked.parents().is('.comments-wrapper, .marker') || clicked.hasClass('commentable-section')) {
             return; // click happened within the dialog, do nothing here
         } else { // click was outside the dialog, so close it
             $(".commentable-section").removeClass("active");
@@ -204,16 +201,25 @@ jQuery(document).ready(function ($) {
     });
 
     //When clicked browser scrolls to top of item
-    $(".marker").click(function () {
-		var previousSelectedHeight = $(".commentable-section.active").outerHeight()
-        $('html, body').animate({
-            scrollTop: $(this).parent().offset().top - $('.menu-topo-mc').outerHeight() - previousSelectedHeight
+    $(".marker").on('click', function (e){
+        var target = $(e.target);
+		var sectionSelected = target.parents(".commentable-section.active");
+        var menuTopo = $('.menu-topo-mc');
+        var scrollPos = sectionSelected.offset().top;
+        if(menuTopo.hasClass('fixed-top-mc')){
+            scrollPos -= menuTopo.outerHeight(true);
+        }else{
+            scrollPos -= menuTopo.outerHeight(true)*2;
+        }
+        $('body,html').animate({
+            scrollTop: scrollPos
         }, 500);
     });
 
     // Stops page from scrolling when mouse is hovering .comments-wrapper .comments
+
     if ($(window).width() > 767) {
-        $('.comments-wrapper .comments').bind('mousewheel DOMMouseScroll', function (e) {
+        $('.comments-wrapper .comments-estructure').bind('mousewheel DOMMouseScroll', function (e) {
             var e0 = e.originalEvent,
                 delta = e0.wheelDelta || -e0.detail;
 

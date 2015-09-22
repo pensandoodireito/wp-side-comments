@@ -74,6 +74,9 @@ class CTLT_WP_Side_Comments
 
         // Get the proper template for post type texto-em-debate
         add_filter('single_template', array($this, 'get_texto_em_debate_template'));
+
+        //Set up searchable area
+        add_filter('the_content', array($this, 'addSearchableClassesToContent'), 51);
     }/* __construct() */
 
     /**
@@ -96,7 +99,6 @@ class CTLT_WP_Side_Comments
         }
 
         wp_register_style('side-comments-style', CTLT_WP_SIDE_COMMENTS_PLUGIN_URL . 'includes/css/side-comments-full.css');
-        wp_register_style('texto-em-debate-style', CTLT_WP_SIDE_COMMENTS_PLUGIN_URL . 'includes/css/texto-em-debate.css');
 
         wp_register_script('side-comments-script', CTLT_WP_SIDE_COMMENTS_PLUGIN_URL . 'includes/js/side-comments.js', array('jquery'));
         wp_register_script('wp-side-comments-script', CTLT_WP_SIDE_COMMENTS_PLUGIN_URL . 'includes/js/wp-side-comments.js', array('jquery', 'side-comments-script'), null, true);
@@ -104,7 +106,6 @@ class CTLT_WP_Side_Comments
         wp_register_script('texto-em-debate-script', CTLT_WP_SIDE_COMMENTS_PLUGIN_URL . 'includes/js/texto-em-debate.js', array('jquery', 'highlight-script'), null, true);
 
         wp_enqueue_style('side-comments-style');
-        wp_enqueue_style('texto-em-debate-style');
 
         wp_enqueue_script('side-comments-script');
         wp_enqueue_script('wp-side-comments-script');
@@ -227,8 +228,21 @@ class CTLT_WP_Side_Comments
                 }
             }
 
-            return $dom->__toString();
+            return $dom->save();
+        }
+        return $content;
+    }
 
+    public function addSearchableClassesToContent($content)
+    {
+        if ($this->get_current_post_type() == "texto-em-debate" && $content) {
+            $dom = new simple_html_dom($content);
+
+            foreach ($dom->childNodes() as $node) {
+                $node->innertext = '<span class="searchable-content">' . $node->innertext . '</span>';
+            }
+
+            return $dom->save();
         }
         return $content;
     }
@@ -565,7 +579,7 @@ class CTLT_WP_Side_Comments
         // Collect data sent to us via the AJAX request
         $postID = absint($_REQUEST['postID']);
         $sectionID = absint($_REQUEST['sectionID']);
-        $commentText = trim(strip_tags($_REQUEST['comment'], '<p><a><br>'));
+        $commentText = strip_tags($_REQUEST['comment'], '<p><a><br>');
         $authorName = sanitize_text_field($_REQUEST['authorName']);
         $authorID = absint($_REQUEST['authorId']);
         $parentID = absint($_REQUEST['parentID']);
@@ -580,7 +594,7 @@ class CTLT_WP_Side_Comments
             $ip = $_SERVER['REMOTE_ADDR'];
         }
 
-        if (strlen($commentText) == 0) {
+        if (strlen(trim(str_replace('&nbsp;', ' ', $commentText))) == 0) {
             wp_send_json_error(array(
                 'error_message' => __('Você não pode enviar um comentário vazio.', 'wp-side-comments')
             ));

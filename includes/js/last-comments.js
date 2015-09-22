@@ -33,12 +33,12 @@ var ComentarioView = Backbone.View.extend({
         var currComment = this.$el.find('#comment-'+this.model.attributes.id);
 
         if(currComment.length == 0){
-            $(this.template(this.model.attributes)).hide().appendTo(this.$el).fadeIn(1000);
+            $(this.template(this.model.attributes)).hide().prependTo(this.$el).fadeIn(1000);
         }
 
         var quantComment = _this.$el.find('.list-group-item:visible').length;
         if(quantComment > 3){
-            _this.$el.find('.list-group-item:visible').first().fadeOut(500);
+            _this.$el.find('.list-group-item:visible').last().fadeOut(500);
         }
 
         return this;
@@ -71,7 +71,7 @@ var SecaoView = Backbone.View.extend({
             var commentArea = sectionArea.find('.list-group');
             comentario = new ComentarioView({model: item, el: commentArea});
             comentario.render();
-            sectionArea.find('a').attr('href', commentFrontParams.post_url + '#' + _this.model.attributes.id);
+            sectionArea.find('a').attr('href', commentFrontParams.post_url + '#commentable-section-' + _this.model.attributes.id);
         });
 
         return this;
