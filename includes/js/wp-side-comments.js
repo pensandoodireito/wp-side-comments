@@ -179,12 +179,7 @@ jQuery(document).ready(function ($) {
         if (!$(this).parent().hasClass('active')) {
             var parent = $(this).parent().parent('p.commentable-section');
             parent.addClass('active');
-
-            $('body').bind('mousewheel', function(e) {
-                    var $div = parent.find('.comments-estructure');
-                    $div.scrollTop($div.scrollTop() - e.originalEvent.wheelDelta);
-                    return false;
-            });
+            
         } else {
             $(this).parent().parent('p.commentable-section').removeClass('active');
         }
@@ -211,8 +206,9 @@ jQuery(document).ready(function ($) {
     });
 
     // Stops page from scrolling when mouse is hovering .comments-wrapper .comments
+
     if ($(window).width() > 767) {
-        $('.comments-wrapper .comments').bind('mousewheel DOMMouseScroll', function (e) {
+        $('.comments-wrapper .comments-estructure').bind('mousewheel DOMMouseScroll', function (e) {
             var e0 = e.originalEvent,
                 delta = e0.wheelDelta || -e0.detail;
 
