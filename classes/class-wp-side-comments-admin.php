@@ -39,9 +39,16 @@ class WP_Side_Comments_Admin
      */
     public function __construct()
     {
+        add_action('init', array($this, 'init'));
         add_action('admin_menu', array($this, 'add_plugin_page'));
         add_action('admin_init', array($this, 'page_init'));
+        add_action('admin_notices', array($this, 'admin_notices'));
         add_action('admin_enqueue_scripts', array($this, 'enqueue_styles'));
+    }
+
+    public function init()
+    {
+        $this->options = get_option(self::SETTINGS_OPTION_NAME, array());
     }
 
     public function enqueue_styles()
@@ -67,7 +74,6 @@ class WP_Side_Comments_Admin
      */
     public function create_admin_page()
     {
-        $this->options = get_option(self::SETTINGS_OPTION_NAME, array());
         ?>
         <div class="wrap">
             <h2><?= self::SETTINGS_PAGE_TITLE ?> </h2>
@@ -91,7 +97,7 @@ class WP_Side_Comments_Admin
         register_setting(
             self::SETTINGS_OPTIONS_GROUP,
             self::SETTINGS_OPTION_NAME,
-            array($this, 'wp_side_comments_input_validate')
+            array($this, 'input_validate')
         );
 
         add_settings_section(
@@ -110,16 +116,31 @@ class WP_Side_Comments_Admin
         );
     }
 
-    public function wp_side_comments_input_validate($input)
+    /**
+     * Validates user input
+     * @param $input
+     * @return mixed|void
+     */
+    public function input_validate($input)
     {
         $validatedInput = array();
         if (isset($input[self::SETTINGS_SECTION_GUESTS_INTERACTION_FIELD_ID])) {
             $value = $input[self::SETTINGS_SECTION_GUESTS_INTERACTION_FIELD_ID];
             if (in_array($value, self::$SETTINGS_SECTION_GUESTS_INTERACTION_FIELD_VALID_VALUES)) {
                 $validatedInput[self::SETTINGS_SECTION_GUESTS_INTERACTION_FIELD_ID] = $value;
+            } else {
+                add_settings_error(self::SETTINGS_OPTION_NAME, 'invalid_value', 'Por favor escolha uma opção válida no campo "' . self::SETTINGS_SECTION_GUESTS_INTERACTION_FIELD_TITLE . '".', $type = 'error');
             }
         }
         return apply_filters('wp_side_comments_input_validate', $validatedInput, $input);
+    }
+
+    /**
+     * Display the validation errors and update messages
+     */
+    function admin_notices()
+    {
+        settings_errors();
     }
 
     /**
@@ -163,5 +184,5 @@ class WP_Side_Comments_Admin
     }
 }
 
-if (is_admin())
-    $WPSideCommentsAdmin = new WP_Side_Comments_Admin();
+global $WPSideCommentsAdmin;
+$WPSideCommentsAdmin = new WP_Side_Comments_Admin();

@@ -69,12 +69,20 @@ class WP_Side_Comments_Visitor_Guest extends WP_Side_Comments_Visitor
     protected $loggedVotes;
 
     /**
+     * Controls if a guest user can vote on a comment
+     * @var $allowGuestVoting
+     */
+    protected $allowGuestVoting;
+
+
+    /**
      * @param $visitorID
      */
-    public function __construct($visitorID)
+    public function __construct($visitorID, $allowGuestVoting)
     {
 
         parent::__construct($visitorID);
+        $this->allowGuestVoting = $allowGuestVoting;
 
         $this->setCookie();
 
@@ -199,10 +207,8 @@ class WP_Side_Comments_Visitor_Guest extends WP_Side_Comments_Visitor
     public function isVoteValid($commentID, $action = '')
     {
 
-        $guestVoteAllowed = false; //TODO: usar configuração do plugin para decidir se o voto anônimo deve ser permitido.
-
-        if (!$guestVoteAllowed) {
-            return new \WP_Error('not_allowed', 'Você precisa estar logado para executar essa ação.');
+        if (!$this->allowGuestVoting) {
+            return new \WP_Error('not_allowed', 'Você precisa estar logado para executar esta ação.');
         }
 
         // @TODO: can we check cookies for a WP cookie matching current domain. If so, then ask user to log in.

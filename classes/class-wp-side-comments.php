@@ -50,11 +50,11 @@ class CTLT_WP_Side_Comments
 
         // Set up AJAX handlers for the create a new comment action
         add_action('wp_ajax_add_side_comment', array($this, 'wp_ajax_add_side_comment__AJAXHandler'));
-        add_action('wp_ajax_nopriv_add_side_comment', array($this, 'wp_ajax_nopriv_side_comment__handler'));
+        add_action('wp_ajax_nopriv_add_side_comment', array($this, 'wp_ajax_add_side_comment__AJAXHandler'));
 
-        // Set up AJAX handlers for comment deltion
+        // Set up AJAX handlers for comment deletion
         add_action('wp_ajax_delete_side_comment', array($this, 'wp_ajax_delete_side_comment__AJAXHandler'));
-        add_action('wp_ajax_nopriv_delete_side_comment', array($this, 'wp_ajax_nopriv_side_comment__handler'));
+        add_action('wp_ajax_nopriv_delete_side_comment', array($this, 'wp_ajax_delete_side_comment__AJAXHandler'));
 
         // Side comments shouldn't be shown in the main comment area at the bototm
         add_filter('wp-hybrid-clf_list_comments_args', array($this, 'list_comments_args__removeSidecommentsFromLinearComments'));
@@ -68,7 +68,7 @@ class CTLT_WP_Side_Comments
 
         //Set up Ajax handlers for refresh nonces
         add_action('wp_ajax_refresh_nonce_callback', array($this, 'refresh_nonce_callback'));
-        add_action('wp_ajax_nopriv_refresh_nonce_callback', array($this, 'wp_ajax_nopriv_side_comment__handler'));
+        add_action('wp_ajax_nopriv_refresh_nonce_callback', array($this, 'refresh_nonce_callback'));
 
         // Get the proper template for post type texto-em-debate
         //Set up AJAX handlers for list last comments per section
@@ -124,9 +124,6 @@ class CTLT_WP_Side_Comments
         //create a nonce for Comment Voting
         $data['voting_nonce'] = wp_create_nonce('side_comments_voting_nonce');
 
-        //create a nonce gor last comments
-        //$data['last_comments_nonce'] = wp_create_nonce('side_comments_last_comments_nonce');
-
         // We also need the admin url as we need to send an AJAX request to it
         // ToDo: fix this, as we need this to not be https for it to work atm
         $adminAjaxURL = admin_url('admin-ajax.php');
@@ -154,6 +151,16 @@ class CTLT_WP_Side_Comments
     private function getCommentTemplate()
     {
         return file_get_contents(CTLT_WP_SIDE_COMMENTS_PLUGIN_PATH . 'templates/comment.html');
+    }
+
+    private function checkInteractionAllowed()
+    {
+        global $WPSideCommentsAdmin;
+        if (!is_user_logged_in() && !$WPSideCommentsAdmin->isGuestInteractionAllowed()) {
+            wp_send_json_error(array(
+                'error_message' => __('Você precisa estar logado para executar esta ação.', 'wp-side-comments')
+            ));
+        }
     }
 
     /**
@@ -253,7 +260,7 @@ class CTLT_WP_Side_Comments
     /**
      * gets the current post type in the WordPress Admin
      */
-    public function get_current_post_type()
+    private function get_current_post_type()
     {
         global $post, $typenow, $current_screen;
 
@@ -301,7 +308,7 @@ class CTLT_WP_Side_Comments
      * @param int $postID - the ID of the post for which we wish to get comment data
      * @return array $commentData - an associative array of comment data and user data
      */
-    public function getCommentsData($postID = false)
+    private function getCommentsData($postID = false)
     {
 
         // Fetch the post ID if we haven't been passed one
@@ -366,7 +373,7 @@ class CTLT_WP_Side_Comments
      * @return string|int returnDescription
      */
 
-    public static function getPostCommentData($postID = false)
+    private static function getPostCommentData($postID = false)
     {
 
         // Fetch the post ID if we haven't been passed one
@@ -454,17 +461,19 @@ class CTLT_WP_Side_Comments
      * @param null
      * @return array $userDetails data about the user
      */
-    public static function getCurrentUserDetails()
+    private static function getCurrentUserDetails()
     {
+        global $WPSideCommentsAdmin;
         $userID = get_current_user_id();
 
-        if (!$userID) {
-            //evita exibição da opção de comentar para usuários anônimos.
+        if ($userID) {
+            return static::getUserDetails($userID);
+        } elseif ($WPSideCommentsAdmin->isGuestInteractionAllowed()) {
+            return static::getDefaultuserDetails();
+        } else {
             return false;
-//                return static::getDefaultuserDetails();
         }
 
-        return static::getUserDetails($userID);
     }/* getCurrentUserDetails() */
 
 
@@ -479,12 +488,12 @@ class CTLT_WP_Side_Comments
      * @return string|int returnDescription
      */
 
-    public static function getDefaultuserDetails()
+    private static function getDefaultuserDetails()
     {
 
         // Build our output
         $userDetails = array(
-            'name' => __('Anonymous', 'wp-side-comments'),
+            'name' => __('Anônimo', 'wp-side-comments'),
             'avatar' => static::get_avatar_url('test@test.com'),
             'id' => 9999
         );
@@ -503,7 +512,7 @@ class CTLT_WP_Side_Comments
      * @return array $userDetails details about the specified user
      */
 
-    public static function getUserDetails($userID = false)
+    private static function getUserDetails($userID = false)
     {
 
         if (!$userID) {
@@ -545,7 +554,7 @@ class CTLT_WP_Side_Comments
      * @return string the url of the avatar
      */
 
-    public static function get_avatar_url($email)
+    private static function get_avatar_url($email)
     {
 
         $avatar_html = get_avatar($email, 24, 'blank');
@@ -569,8 +578,7 @@ class CTLT_WP_Side_Comments
      * @param string $param description
      * @return string|int returnDescription
      */
-
-    public static function wp_ajax_add_side_comment__AJAXHandler()
+    public function wp_ajax_add_side_comment__AJAXHandler()
     {
 
         if (!wp_verify_nonce($_REQUEST['nonce'], 'side_comments_nonce')) {
@@ -578,6 +586,8 @@ class CTLT_WP_Side_Comments
                 'error_message' => __('Você não pode executar esta ação. Tente novamente mais tarde.', 'wp-side-comments')
             ));
         }
+
+        $this->checkInteractionAllowed();
 
         // Collect data sent to us via the AJAX request
         $postID = absint($_REQUEST['postID']);
@@ -615,7 +625,7 @@ class CTLT_WP_Side_Comments
         $wpInsertCommentArgs = array(
             'comment_post_ID' => $postID,
             'comment_author' => $authorName,
-            'comment_author_email' => $user->user_email,
+            'comment_author_email' => $user ? $user->user_email : null,
             'comment_author_url' => null,
             'comment_content' => $commentText,
             'comment_type' => 'side-comment',
@@ -662,23 +672,6 @@ class CTLT_WP_Side_Comments
     }/* wp_ajax_add_side_comment__AJAXHandler() */
 
     /**
-     * AJAX handler for when someone is NOT logged in and trying to make/delete a comment.
-     * Probably should never get to here because of comments_open() being used, but
-     * better safe than sorry.
-     *
-     * @since 0.1
-     *
-     * @param string $param description
-     * @return string|int returnDescription
-     */
-    public static function wp_ajax_nopriv_side_comment__handler()
-    {
-        wp_send_json_error(array(
-            'error_message' => __('Você precisa estar logado para executar esta ação.', 'wp-side-comments')
-        ));
-    }/* wp_ajax_nopriv_side_comment__handler() */
-
-    /**
      * AJAX handler for when a comment is deleted
      *
      * @since 0.1
@@ -686,13 +679,14 @@ class CTLT_WP_Side_Comments
      * @param null
      * @return null
      */
-
-    public static function wp_ajax_delete_side_comment__AJAXHandler()
+    public function wp_ajax_delete_side_comment__AJAXHandler()
     {
 
         if (!wp_verify_nonce($_REQUEST['nonce'], 'side_comments_nonce')) {
             exit(__('Nonce check failed', 'wp-side-comments'));
         }
+
+        $this->checkInteractionAllowed();
 
         // Collect data sent to us via the AJAX request
         $postID = absint($_REQUEST['postID']);
@@ -841,6 +835,8 @@ class CTLT_WP_Side_Comments
     {
         check_ajax_referer('side_comments_voting_nonce', 'vote_nonce');
 
+        $this->checkInteractionAllowed();
+
         $postID = absint($_POST['post_id']);
         $commentID = absint($_POST['comment_id']);
         $vote = $_POST['vote'];
@@ -861,7 +857,7 @@ class CTLT_WP_Side_Comments
             ));
         }
 
-        $result = $this->commentVote($this->visitor->getId(), $commentID, $vote);
+        $result = $this->commentVote($this->getVisitor()->getId(), $commentID, $vote);
 
         if (array_key_exists('error_message', $result)) {
             wp_send_json_error($result);
@@ -880,7 +876,7 @@ class CTLT_WP_Side_Comments
      *
      * @return array
      */
-    public function commentVote($userID, $commentID, $vote)
+    private function commentVote($userID, $commentID, $vote)
     {
 
         $labels = $this->getVoteLabels();
@@ -921,7 +917,7 @@ class CTLT_WP_Side_Comments
     /**
      * @return array
      */
-    public function getVoteLabels()
+    private function getVoteLabels()
     {
         return array(
             'upvote' => 'concordar',
@@ -955,7 +951,7 @@ class CTLT_WP_Side_Comments
      *
      * @return int
      */
-    public function updateCommentKarma($commentID, $voteValue)
+    private function updateCommentKarma($commentID, $voteValue)
     {
 
         $comment = get_comment($commentID, ARRAY_A);
@@ -985,14 +981,12 @@ class CTLT_WP_Side_Comments
         return $single_template;
     }
 
-    /* class CTLT_WP_Side_Comments */
-
     /**
      * Register the full count of upvote/downvote
      * @param $commentID
      * @param $vote
      */
-    public function updateFullKarma($commentID, $vote)
+    private function updateFullKarma($commentID, $vote)
     {
         $karma = get_comment_meta($commentID, WP_Side_Comments_Visitor::KEY_PREFIX . '_' . $vote, true);
         if ($karma) {
@@ -1013,7 +1007,7 @@ class CTLT_WP_Side_Comments
      *
      * @return int|mixed|void
      */
-    public function getVoteValue($type)
+    private function getVoteValue($type)
     {
         switch ($type) {
             case 'upvote':
@@ -1032,6 +1026,8 @@ class CTLT_WP_Side_Comments
 
     public function refresh_nonce_callback()
     {
+        $this->checkInteractionAllowed();
+
         $data['nonce'] = wp_create_nonce('side_comments_nonce');
         $data['voting_nonce'] = wp_create_nonce('side_comments_voting_nonce');
         wp_send_json_success($data);
@@ -1174,14 +1170,16 @@ class CTLT_WP_Side_Comments
 //Plugin initializer
 function wpsc_init_side_comments()
 {
+    global $WPSideCommentsAdmin;
     global $CTLT_WP_Side_Comments;
     $CTLT_WP_Side_Comments = new CTLT_WP_Side_Comments();
 
-    //TODO: vamos bloquear os votos de usuários não logados?
     if (is_user_logged_in()) {
         $visitor = new WP_Side_Comments_Visitor_Member(get_current_user_id());
+    } elseif ($WPSideCommentsAdmin->isGuestInteractionAllowed()) {
+        $visitor = new WP_Side_Comments_Visitor_Guest($_SERVER['REMOTE_ADDR'], true);
     } else {
-        $visitor = new WP_Side_Comments_Visitor_Guest($_SERVER['REMOTE_ADDR']);
+        return;
     }
 
     if (!($CTLT_WP_Side_Comments->getVisitor() instanceof WP_Side_Comments_Visitor)) {
@@ -1190,4 +1188,4 @@ function wpsc_init_side_comments()
 }
 
 //register initializer hook
-add_action('plugins_loaded', 'wpsc_init_side_comments');
+add_action('init', 'wpsc_init_side_comments', 11);
