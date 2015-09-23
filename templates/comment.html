@@ -13,7 +13,7 @@
                 <!--//<span id="comment-weight-value-<%= comment.commentID %>"><%= comment.karma %></span>-->
 
                 <div class="mt-xs">
-                    <% if (allowUserInteraction){ %>
+                    <% if (currentUser && allowUserInteraction){ %>
                     <a data-comment-id="<%= comment.commentID %>"
                        class="vote-up vote-btn btn btn-default btn-xs fontsize-sm text-green" href="#"><i
                             class="fa fa-thumbs-o-up"></i> Concordo <span
