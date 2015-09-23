@@ -13,6 +13,9 @@ require_once CTLT_WP_SIDE_COMMENTS_PLUGIN_PATH . 'classes/class-side-comments-wa
 //includes required classes for html parsing
 require_once CTLT_WP_SIDE_COMMENTS_PLUGIN_PATH . 'classes/simple_html_dom.php';
 
+//includes required classes for comment voting
+require_once CTLT_WP_SIDE_COMMENTS_PLUGIN_PATH . 'classes/class-visitor.php';
+
 class CTLT_WP_Side_Comments
 {
     /**
@@ -1167,3 +1170,24 @@ class CTLT_WP_Side_Comments
         return $sections;
     }
 }/* class CTLT_WP_Side_Comments */
+
+//Plugin initializer
+function wpsc_init_side_comments()
+{
+    global $CTLT_WP_Side_Comments;
+    $CTLT_WP_Side_Comments = new CTLT_WP_Side_Comments();
+
+    //TODO: vamos bloquear os votos de usuários não logados?
+    if (is_user_logged_in()) {
+        $visitor = new WP_Side_Comments_Visitor_Member(get_current_user_id());
+    } else {
+        $visitor = new WP_Side_Comments_Visitor_Guest($_SERVER['REMOTE_ADDR']);
+    }
+
+    if (!($CTLT_WP_Side_Comments->getVisitor() instanceof WP_Side_Comments_Visitor)) {
+        $CTLT_WP_Side_Comments->setVisitor($visitor);
+    }
+}
+
+//register initializer hook
+add_action('plugins_loaded', 'wpsc_init_side_comments');

@@ -201,3 +201,13 @@ class Texto_Em_Debate_Post_Type
         return "<h{$matches[2]} {$matches[3]} id='" . str_replace('--', '-', str_replace('8211', '', $this->slugfy($matches[4]))) . "'>{$matches[4]}</h{$matches[2]}>";
     }
 }
+
+//Custom Post Type initializer
+function wpsc_init_texto_em_debate()
+{
+    global $Texto_Em_Debate_Post_Type;
+    $Texto_Em_Debate_Post_Type = new Texto_Em_Debate_Post_Type();
+}
+
+//Register initializer hook
+add_action('init', 'wpsc_init_texto_em_debate');
