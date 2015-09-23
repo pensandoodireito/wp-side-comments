@@ -305,4 +305,21 @@ jQuery(document).ready(function ($) {
 
     });
 
+    $('body').on('user_logged_out', function (e) {
+        var post = $.post(
+            ajaxURL, {
+                action: 'refresh_nonce_callback'
+            }
+        );
+
+        post.done(function (response) {
+            if (response.success === false) {
+                console.log(response.data.error_message);
+            } else {
+                nonce = response.data.nonce;
+                voting_nonce = response.data.voting_nonce;
+                sideComments.setCurrentUser(null);
+            }
+        });
+    });
 });
