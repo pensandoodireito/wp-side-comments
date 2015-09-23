@@ -102,8 +102,10 @@ jQuery(document).ready(function ($) {
 
                         // We'll need this if we want to delete the comment.
                         var newComment = sideComments.insertComment(comment);
-                        var commentArea = $('#commentable-section-'+comment.sectionId+' .comments-estructure');
-                        commentArea.animate({ scrollTop: commentArea.find('.comments').height() }, 1000);
+                        var commentArea = $('#commentable-section-' + comment.sectionId + ' .comments-estructure');
+                        var elementTop = commentArea.find('li.comment-main[data-comment-id=' + newCommentID + ']').offset().top;
+                        var scrollPosition = elementTop - commentArea.offset().top + commentArea.scrollTop();
+                        commentArea.animate({scrollTop: scrollPosition}, 1000);
                     }
                 },
                 error: function (jqXHR, textStatus, errorThrown) {
@@ -182,7 +184,7 @@ jQuery(document).ready(function ($) {
         if (!$(this).parent().hasClass('active')) {
             var parent = $(this).parent().parent('p.commentable-section');
             parent.addClass('active');
-            
+
         } else {
             $(this).parent().parent('p.commentable-section').removeClass('active');
         }
