@@ -29,12 +29,21 @@ class CTLT_WP_Side_Comments
     static $currentSectionID = 0;
 
     /**
+     * @var WP_Side_Comments_Admin
+     */
+    protected $WPSideCommentsAdmin;
+
+    /**
      * Set up our actions and filters
      *
      * @since 0.1
+     *
+     * @param WP_Side_Comments_Admin $WP_Side_Comments_Admin
      */
-    public function __construct()
+    public function __construct(WP_Side_Comments_Admin $WP_Side_Comments_Admin)
     {
+
+        $this->WPSideCommentsAdmin = $WP_Side_Comments_Admin;
 
         // Load the necessary js/css
         add_action('wp_enqueue_scripts', array($this, 'wp_enqueue_scripts__loadScriptsAndStyles'));
@@ -155,8 +164,7 @@ class CTLT_WP_Side_Comments
 
     private function checkInteractionAllowed()
     {
-        global $WPSideCommentsAdmin;
-        if (!is_user_logged_in() && !$WPSideCommentsAdmin->isGuestInteractionAllowed()) {
+        if (!is_user_logged_in() && !$this->WPSideCommentsAdmin->isGuestInteractionAllowed()) {
             wp_send_json_error(array(
                 'error_message' => __('Você precisa estar logado para executar esta ação.', 'wp-side-comments')
             ));
@@ -461,14 +469,13 @@ class CTLT_WP_Side_Comments
      * @param null
      * @return array $userDetails data about the user
      */
-    private static function getCurrentUserDetails()
+    private function getCurrentUserDetails()
     {
-        global $WPSideCommentsAdmin;
         $userID = get_current_user_id();
 
         if ($userID) {
             return static::getUserDetails($userID);
-        } elseif ($WPSideCommentsAdmin->isGuestInteractionAllowed()) {
+        } elseif ($this->WPSideCommentsAdmin->isGuestInteractionAllowed()) {
             return static::getDefaultuserDetails();
         } else {
             return false;
@@ -1172,7 +1179,7 @@ function wpsc_init_side_comments()
 {
     global $WPSideCommentsAdmin;
     global $CTLT_WP_Side_Comments;
-    $CTLT_WP_Side_Comments = new CTLT_WP_Side_Comments();
+    $CTLT_WP_Side_Comments = new CTLT_WP_Side_Comments($WPSideCommentsAdmin);
 
     if (is_user_logged_in()) {
         $visitor = new WP_Side_Comments_Visitor_Member(get_current_user_id());
