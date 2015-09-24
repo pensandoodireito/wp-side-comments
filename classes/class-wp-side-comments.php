@@ -154,12 +154,12 @@ class CTLT_WP_Side_Comments
 
     private function getSectionTemplate()
     {
-        return file_get_contents(CTLT_WP_SIDE_COMMENTS_PLUGIN_PATH . 'templates/section.html');
+        return $this->WPSideCommentsAdmin->getCurrentSectionTemplate();
     }
 
     private function getCommentTemplate()
     {
-        return file_get_contents(CTLT_WP_SIDE_COMMENTS_PLUGIN_PATH . 'templates/comment.html');
+        return $this->WPSideCommentsAdmin->getCurrentCommentTemplate();
     }
 
     private function checkInteractionAllowed()

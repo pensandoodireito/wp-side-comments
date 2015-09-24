@@ -24,6 +24,14 @@ class WP_Side_Comments_Admin
     const SETTINGS_SECTION_GUESTS_INTERACTION_FIELD_VALUE_ALLOW = 'S';
     const SETTINGS_SECTION_GUESTS_INTERACTION_FIELD_VALUE_DENY = 'N';
 
+    const SETTINGS_SECTION_CUSTOM_TEMPLATES_ID = 'wp-side-comments-custom-templates';
+    const SETTINGS_SECTION_CUSTOM_TEMPLATES_TITLE = 'Templates Personalizados';
+
+    const SETTINGS_SECTION_CUSTOM_TEMPLATES_FIELD_SECTION_ID = 'wp-side-comments-custom-templates-field-section';
+    const SETTINGS_SECTION_CUSTOM_TEMPLATES_FIELD_SECTION_TITLE = 'Personalize o template da seção de comentários:';
+    const SETTINGS_SECTION_CUSTOM_TEMPLATES_FIELD_COMMENT_ID = 'wp-side-comments-custom-templates-field-comment';
+    const SETTINGS_SECTION_CUSTOM_TEMPLATES_FIELD_COMMENT_TITLE = 'Personalize o template do comentário:';
+
     private static $SETTINGS_SECTION_GUESTS_INTERACTION_FIELD_VALID_VALUES = array(
         self::SETTINGS_SECTION_GUESTS_INTERACTION_FIELD_VALUE_ALLOW,
         self::SETTINGS_SECTION_GUESTS_INTERACTION_FIELD_VALUE_DENY
@@ -74,6 +82,7 @@ class WP_Side_Comments_Admin
      */
     public function create_admin_page()
     {
+        //TODO: recuperar o HTML de outro local
         ?>
         <div class="wrap">
             <h2><?= self::SETTINGS_PAGE_TITLE ?> </h2>
@@ -104,7 +113,7 @@ class WP_Side_Comments_Admin
             self::SETTINGS_SECTION_GUESTS_INTERACTION_ID,
             self::SETTINGS_SECTION_GUESTS_INTERACTION_TITLE,
             array($this, 'print_section_guests_interaction_info'),
-            self::SETTINGS_PAGE_NAME // Page
+            self::SETTINGS_PAGE_NAME
         );
 
         add_settings_field(
@@ -113,6 +122,29 @@ class WP_Side_Comments_Admin
             array($this, 'print_guests_interaction_field_callback'),
             self::SETTINGS_PAGE_NAME,
             self::SETTINGS_SECTION_GUESTS_INTERACTION_ID
+        );
+
+        add_settings_section(
+            self::SETTINGS_SECTION_CUSTOM_TEMPLATES_ID,
+            self::SETTINGS_SECTION_CUSTOM_TEMPLATES_TITLE,
+            array($this, 'print_section_custom_templates_info'),
+            self::SETTINGS_PAGE_NAME
+        );
+
+        add_settings_field(
+            self::SETTINGS_SECTION_CUSTOM_TEMPLATES_FIELD_SECTION_ID,
+            self::SETTINGS_SECTION_CUSTOM_TEMPLATES_FIELD_SECTION_TITLE,
+            array($this, 'print_section_custom_templates_field_section'),
+            self::SETTINGS_PAGE_NAME,
+            self::SETTINGS_SECTION_CUSTOM_TEMPLATES_ID
+        );
+
+        add_settings_field(
+            self::SETTINGS_SECTION_CUSTOM_TEMPLATES_FIELD_COMMENT_ID,
+            self::SETTINGS_SECTION_CUSTOM_TEMPLATES_FIELD_COMMENT_TITLE,
+            array($this, 'print_section_custom_templates_field_comment'),
+            self::SETTINGS_PAGE_NAME,
+            self::SETTINGS_SECTION_CUSTOM_TEMPLATES_ID
         );
     }
 
@@ -132,6 +164,17 @@ class WP_Side_Comments_Admin
                 add_settings_error(self::SETTINGS_OPTION_NAME, 'invalid_value', 'Por favor escolha uma opção válida no campo "' . self::SETTINGS_SECTION_GUESTS_INTERACTION_FIELD_TITLE . '".', $type = 'error');
             }
         }
+
+        if (isset($input[self::SETTINGS_SECTION_CUSTOM_TEMPLATES_FIELD_SECTION_ID])) {
+            $value = $input[self::SETTINGS_SECTION_CUSTOM_TEMPLATES_FIELD_SECTION_ID];
+            $validatedInput[self::SETTINGS_SECTION_CUSTOM_TEMPLATES_FIELD_SECTION_ID] = $value;
+        }
+
+        if (isset($input[self::SETTINGS_SECTION_CUSTOM_TEMPLATES_FIELD_COMMENT_ID])) {
+            $value = $input[self::SETTINGS_SECTION_CUSTOM_TEMPLATES_FIELD_COMMENT_ID];
+            $validatedInput[self::SETTINGS_SECTION_CUSTOM_TEMPLATES_FIELD_COMMENT_ID] = $value;
+        }
+
         return apply_filters('wp_side_comments_input_validate', $validatedInput, $input);
     }
 
@@ -144,20 +187,31 @@ class WP_Side_Comments_Admin
     }
 
     /**
-     * Print the Section text
+     * Print the guests interaction section text
      */
     public function print_section_guests_interaction_info()
     {
+        //TODO: recuperar texto de outro lugar
         print 'Escolha se você deseja permitir que os usuários visitantes interajam nos textos em debate: <br/>
                 - Caso você escolha <b>SIM</b> qualquer usuário poderá comentar e votar nos comentários do texto; <br/>
                 - Caso escolha <b>NÃO</b> apenas os usuários logados no site poderão comentar e votar nos comentários do texto.';
     }
 
     /**
-     * Get the settings option array and print one of its values
+     * Print the custom templates section text
+     */
+    public function print_section_custom_templates_info()
+    {
+        //TODO: recuperar texto de outro lugar
+        print 'Personalize a exibição do bloco de comentários laterais.';
+    }
+
+    /**
+     * Prints the value of allow guest interaction
      */
     public function print_guests_interaction_field_callback()
     {
+        //TODO: recuperar HTML de outro local
         printf(
             '<span class="radio"><input type="radio" id="%s" name="%s[%s]" value="%s" %s>SIM</span>',
             self::SETTINGS_SECTION_GUESTS_INTERACTION_FIELD_ID . '-allow',
@@ -177,6 +231,73 @@ class WP_Side_Comments_Admin
         );
     }
 
+    /**
+     * prints the value of the section's template
+     */
+    public function print_section_custom_templates_field_section()
+    {
+        //TODO: recuperar HTML de outro local
+        //TODO: implementar editor de texto com highlight para html
+        printf(
+            '<textarea class="section" id="%s" name="%s[%s]">%s</textarea>',
+            self::SETTINGS_SECTION_CUSTOM_TEMPLATES_FIELD_SECTION_ID,
+            self::SETTINGS_OPTION_NAME,
+            self::SETTINGS_SECTION_CUSTOM_TEMPLATES_FIELD_SECTION_ID,
+            $this->getCurrentSectionTemplate()
+        );
+    }
+
+    /**
+     * prints the value of comment's template
+     */
+    public function print_section_custom_templates_field_comment()
+    {
+        //TODO: recuperar HTML de outro local
+        //TODO: implementar editor de texto com highlight para html
+        printf(
+            '<textarea class="section" id="%s" name="%s[%s]">%s</textarea>',
+            self::SETTINGS_SECTION_CUSTOM_TEMPLATES_FIELD_COMMENT_ID,
+            self::SETTINGS_OPTION_NAME,
+            self::SETTINGS_SECTION_CUSTOM_TEMPLATES_FIELD_COMMENT_ID,
+            $this->getCurrentCommentTemplate()
+        );
+    }
+
+    /**
+     * Find the current template for comment's section
+     *
+     * @return string the template
+     */
+    public function getCurrentSectionTemplate()
+    {
+        //TODO: considerar opçao de usar o template default mesmo com um template diferente cadastrado no banco de dados
+        if (isset($this->options[self::SETTINGS_SECTION_CUSTOM_TEMPLATES_FIELD_SECTION_ID])) {
+            return $this->options[self::SETTINGS_SECTION_CUSTOM_TEMPLATES_FIELD_SECTION_ID];
+        } else {
+            return file_get_contents(CTLT_WP_SIDE_COMMENTS_PLUGIN_PATH . 'templates/section.html');
+        }
+    }
+
+    /**
+     * Find the current template for comment
+     *
+     * @return string the template
+     */
+    public function getCurrentCommentTemplate()
+    {
+        //TODO: considerar opçao de usar o template default mesmo com um template diferente cadastrado no banco de dados
+        if (isset($this->options[self::SETTINGS_SECTION_CUSTOM_TEMPLATES_FIELD_COMMENT_ID])) {
+            return $this->options[self::SETTINGS_SECTION_CUSTOM_TEMPLATES_FIELD_COMMENT_ID];
+        } else {
+            return file_get_contents(CTLT_WP_SIDE_COMMENTS_PLUGIN_PATH . 'templates/comment.html');
+        }
+    }
+
+    /**
+     * Checks whether a guest user is able to interact or not
+     *
+     * @return bool returns TRUE if the user is able to interact, FALSE otherwise
+     */
     public function isGuestInteractionAllowed()
     {
         return isset($this->options[self::SETTINGS_SECTION_GUESTS_INTERACTION_FIELD_ID])
