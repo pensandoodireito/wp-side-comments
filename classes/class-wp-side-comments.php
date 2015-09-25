@@ -110,20 +110,36 @@ class CTLT_WP_Side_Comments
             return;
         }
 
-        wp_register_style('side-comments-style', CTLT_WP_SIDE_COMMENTS_PLUGIN_URL . 'includes/css/side-comments-full.css');
+        $this->enqueueStyle();
+        $this->enqueueScripts();
+        $this->localizeScripts();
 
+    }/* wp_enqueue_scripts__loadScriptsAndStyles() */
+
+    private function enqueueStyle()
+    {
+        //TODO: encontrar uma maneira de não duplicar todo o CSS
+        wp_register_style('side-comments-style', CTLT_WP_SIDE_COMMENTS_PLUGIN_URL . 'includes/css/side-comments-full.css');
+        wp_add_inline_style('side-comments-style', $this->WPSideCommentsAdmin->getCurrentStyle());
+
+        wp_enqueue_style('side-comments-style');
+    }
+
+    private function enqueueScripts()
+    {
         wp_register_script('side-comments-script', CTLT_WP_SIDE_COMMENTS_PLUGIN_URL . 'includes/js/side-comments.js', array('jquery'));
         wp_register_script('wp-side-comments-script', CTLT_WP_SIDE_COMMENTS_PLUGIN_URL . 'includes/js/wp-side-comments.js', array('jquery', 'side-comments-script'), null, true);
         wp_register_script('highlight-script', CTLT_WP_SIDE_COMMENTS_PLUGIN_URL . 'includes/js/jquery.highlight-5.js', array('jquery'));
         wp_register_script('texto-em-debate-script', CTLT_WP_SIDE_COMMENTS_PLUGIN_URL . 'includes/js/texto-em-debate.js', array('jquery', 'highlight-script'), null, true);
 
-        wp_enqueue_style('side-comments-style');
-
         wp_enqueue_script('side-comments-script');
         wp_enqueue_script('wp-side-comments-script');
         wp_enqueue_script('highlight-script');
         wp_enqueue_script('texto-em-debate-script');
+    }
 
+    private function localizeScripts()
+    {
         // Need to get some data for our JS, which we pass to it via localization
         $data = $this->getCommentsData();
 
@@ -148,9 +164,7 @@ class CTLT_WP_Side_Comments
 
         wp_localize_script('side-comments-script', 'templates', $templates);
         wp_localize_script('wp-side-comments-script', 'commentsData', $data);
-
-    }/* wp_enqueue_scripts__loadScriptsAndStyles() */
-
+    }
 
     private function getSectionTemplate()
     {
