@@ -670,7 +670,7 @@ require.register("side-comments/js/section.js", function (exports, require, modu
             var commentID = event.currentTarget.attributes["data-comment"].value;
             this.showCommentForm(parentID, commentID);
         } else {
-            this.eventPipe.emit('addCommentAttempted');//TODO
+            this.eventPipe.emit('addCommentAttempted');
         }
     };
 

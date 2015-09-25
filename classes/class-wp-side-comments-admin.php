@@ -28,9 +28,19 @@ class WP_Side_Comments_Admin
     const SETTINGS_SECTION_CUSTOM_TEMPLATES_TITLE = 'Templates Personalizados';
 
     const SETTINGS_SECTION_CUSTOM_TEMPLATES_FIELD_SECTION_ID = 'wp-side-comments-custom-templates-field-section';
+    const SETTINGS_SECTION_CUSTOM_TEMPLATES_EDITOR_SECTION_ID = 'section-template-editor';
     const SETTINGS_SECTION_CUSTOM_TEMPLATES_FIELD_SECTION_TITLE = 'Personalize o template da seção de comentários:';
+
     const SETTINGS_SECTION_CUSTOM_TEMPLATES_FIELD_COMMENT_ID = 'wp-side-comments-custom-templates-field-comment';
+    const SETTINGS_SECTION_CUSTOM_TEMPLATES_EDITOR_COMMENT_ID = 'comment-template-editor';
     const SETTINGS_SECTION_CUSTOM_TEMPLATES_FIELD_COMMENT_TITLE = 'Personalize o template do comentário:';
+
+    const SETTINGS_SECTION_CUSTOM_STYLE_ID = 'wp-side-comments-custom-style';
+    const SETTINGS_SECTION_CUSTOM_STYLE_TITLE = 'Estilos Personalizados';
+
+    const SETTINGS_SECTION_CUSTOM_STYLE_FIELD_ID = 'wp-side-comments-custom-style';
+    const SETTINGS_SECTION_CUSTOM_STYLE_EDITOR_ID = 'style-editor';
+    const SETTINGS_SECTION_CUSTOM_STYLE_FIELD_TITLE = 'Personalize o estilo:';
 
     private static $SETTINGS_SECTION_GUESTS_INTERACTION_FIELD_VALID_VALUES = array(
         self::SETTINGS_SECTION_GUESTS_INTERACTION_FIELD_VALUE_ALLOW,
@@ -52,6 +62,7 @@ class WP_Side_Comments_Admin
         add_action('admin_init', array($this, 'page_init'));
         add_action('admin_notices', array($this, 'admin_notices'));
         add_action('admin_enqueue_scripts', array($this, 'enqueue_styles'));
+        add_action('admin_enqueue_scripts', array($this, 'enqueue_scripts'));
     }
 
     public function init()
@@ -63,6 +74,28 @@ class WP_Side_Comments_Admin
     {
         wp_register_style('wp-side-comments-admin-style', CTLT_WP_SIDE_COMMENTS_PLUGIN_URL . 'includes/css/wp-side-comments-admin.css');
         wp_enqueue_style('wp-side-comments-admin-style');
+    }
+
+    public function enqueue_scripts()
+    {
+        wp_register_script('ace-script', CTLT_WP_SIDE_COMMENTS_PLUGIN_URL . 'includes/js/ace/src-min-noconflict/ace.js');
+        wp_register_script('beautify-css-script', CTLT_WP_SIDE_COMMENTS_PLUGIN_URL . 'includes/js/codemirror/beautify-css.js');
+        wp_register_script('wp-side-comments-admin-script', CTLT_WP_SIDE_COMMENTS_PLUGIN_URL . 'includes/js/wp-side-comments-admin.js', array('ace-script', 'beautify-css-script'));
+
+        wp_enqueue_script('ace-script');
+        wp_enqueue_script('beautify-css-script');
+        wp_enqueue_script('wp-side-comments-admin-script');
+
+        $data = array(
+            'styleEditorID' => self::SETTINGS_SECTION_CUSTOM_STYLE_EDITOR_ID,
+            'commentTemplateEditorID' => self::SETTINGS_SECTION_CUSTOM_TEMPLATES_EDITOR_COMMENT_ID,
+            'sectionTemplateEditorID' => self::SETTINGS_SECTION_CUSTOM_TEMPLATES_EDITOR_SECTION_ID,
+            'styleFieldID' => self::SETTINGS_SECTION_CUSTOM_STYLE_FIELD_ID,
+            'commentTemplateFieldID' => self::SETTINGS_SECTION_CUSTOM_TEMPLATES_FIELD_COMMENT_ID,
+            'sectionTemplateFieldID' => self::SETTINGS_SECTION_CUSTOM_TEMPLATES_FIELD_SECTION_ID
+        );
+
+        wp_localize_script('wp-side-comments-admin-script', 'data', $data);
     }
 
     public function add_plugin_page()
@@ -146,6 +179,21 @@ class WP_Side_Comments_Admin
             self::SETTINGS_PAGE_NAME,
             self::SETTINGS_SECTION_CUSTOM_TEMPLATES_ID
         );
+
+        add_settings_section(
+            self::SETTINGS_SECTION_CUSTOM_STYLE_ID,
+            self::SETTINGS_SECTION_CUSTOM_STYLE_TITLE,
+            array($this, 'print_section_custom_style_info'),
+            self::SETTINGS_PAGE_NAME
+        );
+
+        add_settings_field(
+            self::SETTINGS_SECTION_CUSTOM_STYLE_FIELD_ID,
+            self::SETTINGS_SECTION_CUSTOM_STYLE_FIELD_TITLE,
+            array($this, 'print_section_custom_style_field'),
+            self::SETTINGS_PAGE_NAME,
+            self::SETTINGS_SECTION_CUSTOM_STYLE_ID
+        );
     }
 
     /**
@@ -175,11 +223,17 @@ class WP_Side_Comments_Admin
             $validatedInput[self::SETTINGS_SECTION_CUSTOM_TEMPLATES_FIELD_COMMENT_ID] = $value;
         }
 
+        if (isset($input[self::SETTINGS_SECTION_CUSTOM_STYLE_FIELD_ID])) {
+            $value = $input[self::SETTINGS_SECTION_CUSTOM_STYLE_FIELD_ID];
+            //TODO: minify CSS
+            $validatedInput[self::SETTINGS_SECTION_CUSTOM_STYLE_FIELD_ID] = $value;
+        }
+
         return apply_filters('wp_side_comments_input_validate', $validatedInput, $input);
     }
 
     /**
-     * Display the validation errors and update messages
+     * Displays the validation errors and update messages
      */
     function admin_notices()
     {
@@ -187,7 +241,7 @@ class WP_Side_Comments_Admin
     }
 
     /**
-     * Print the guests interaction section text
+     * Prints the guests interaction section text
      */
     public function print_section_guests_interaction_info()
     {
@@ -204,6 +258,15 @@ class WP_Side_Comments_Admin
     {
         //TODO: recuperar texto de outro lugar
         print 'Personalize a exibição do bloco de comentários laterais.';
+    }
+
+    /**
+     * Prints the custom style section text
+     */
+    public function print_section_custom_style_info()
+    {
+        //TODO: recuperar texto de outro lugar
+        print 'Personalize os estilos usados nos comentários laterais e no "Texto em Debate"';
     }
 
     /**
@@ -237,14 +300,15 @@ class WP_Side_Comments_Admin
     public function print_section_custom_templates_field_section()
     {
         //TODO: recuperar HTML de outro local
-        //TODO: implementar editor de texto com highlight para html
         printf(
-            '<textarea class="section" id="%s" name="%s[%s]">%s</textarea>',
+            '<textarea class="section hidden" id="%s" name="%s[%s]">%s</textarea>',
             self::SETTINGS_SECTION_CUSTOM_TEMPLATES_FIELD_SECTION_ID,
             self::SETTINGS_OPTION_NAME,
             self::SETTINGS_SECTION_CUSTOM_TEMPLATES_FIELD_SECTION_ID,
             $this->getCurrentSectionTemplate()
         );
+
+        echo '<div id="' . self::SETTINGS_SECTION_CUSTOM_TEMPLATES_EDITOR_SECTION_ID . '" class="editor">' . htmlentities($this->getCurrentSectionTemplate()) . '</div>';
     }
 
     /**
@@ -253,14 +317,32 @@ class WP_Side_Comments_Admin
     public function print_section_custom_templates_field_comment()
     {
         //TODO: recuperar HTML de outro local
-        //TODO: implementar editor de texto com highlight para html
         printf(
-            '<textarea class="section" id="%s" name="%s[%s]">%s</textarea>',
+            '<textarea class="section hidden" id="%s" name="%s[%s]">%s</textarea>',
             self::SETTINGS_SECTION_CUSTOM_TEMPLATES_FIELD_COMMENT_ID,
             self::SETTINGS_OPTION_NAME,
             self::SETTINGS_SECTION_CUSTOM_TEMPLATES_FIELD_COMMENT_ID,
             $this->getCurrentCommentTemplate()
         );
+
+        echo '<div id="' . self::SETTINGS_SECTION_CUSTOM_TEMPLATES_EDITOR_COMMENT_ID . '" class="editor">' . htmlentities($this->getCurrentCommentTemplate()) . '</div>';
+    }
+
+    /**
+     * prints the value of custom style
+     */
+    public function print_section_custom_style_field()
+    {
+        //TODO: recuperar HTML de outro local
+        printf(
+            '<textarea class="section hidden" id="%s" name="%s[%s]">%s</textarea>',
+            self::SETTINGS_SECTION_CUSTOM_STYLE_FIELD_ID,
+            self::SETTINGS_OPTION_NAME,
+            self::SETTINGS_SECTION_CUSTOM_STYLE_FIELD_ID,
+            $this->getCurrentStyle()
+        );
+
+        echo '<div id="' . self::SETTINGS_SECTION_CUSTOM_STYLE_EDITOR_ID . '" class="editor">' . $this->getCurrentStyle() . '</div>';
     }
 
     /**
@@ -290,6 +372,21 @@ class WP_Side_Comments_Admin
             return $this->options[self::SETTINGS_SECTION_CUSTOM_TEMPLATES_FIELD_COMMENT_ID];
         } else {
             return file_get_contents(CTLT_WP_SIDE_COMMENTS_PLUGIN_PATH . 'templates/comment.html');
+        }
+    }
+
+    /**
+     * Find the current style
+     *
+     * @return string the style
+     */
+    public function getCurrentStyle()
+    {
+        //TODO: considerar opçao de usar o estilo default mesmo com um estilo diferente cadastrado no banco de dados
+        if (isset($this->options[self::SETTINGS_SECTION_CUSTOM_STYLE_FIELD_ID])) {
+            return $this->options[self::SETTINGS_SECTION_CUSTOM_STYLE_FIELD_ID];
+        } else {
+            return file_get_contents(CTLT_WP_SIDE_COMMENTS_PLUGIN_PATH . 'includes/css/side-comments-full.css');
         }
     }
 
