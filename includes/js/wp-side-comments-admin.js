@@ -8,8 +8,24 @@ jQuery(document).ready(function ($) {
     var commentTemplateEditor;
     var sectionTemplateEditor;
 
+    var customSectionUseSelector = 'input[name=' + data.optionsName + '\\[' + data.useCustomSectionID + '\\]]';
+    var customCommentUseSelector = 'input[name=' + data.optionsName + '\\[' + data.useCustomCommentID + '\\]]';
+    var customStyleSelector = 'input[name=' + data.optionsName + '\\[' + data.useCustomStyleID + '\\]]';
+
     jQuery('input#submit').click(function (e) {
         prepareForm();
+    });
+
+    jQuery(customSectionUseSelector).change(function (e) {
+        checkCustomSectionUsage();
+    });
+
+    jQuery(customCommentUseSelector).change(function (e) {
+        checkCustomCommentUsage();
+    });
+
+    jQuery(customStyleSelector).change(function (e) {
+        checkCustomStyleUsage();
     });
 
     function createEditor(element, mode) {
@@ -42,7 +58,41 @@ jQuery(document).ready(function ($) {
         jQuery('#' + data.sectionTemplateFieldID).html(sectionTemplateEditor.getValue());
     }
 
+    function checkCustomSectionUsage() {
+        var element = jQuery(customSectionUseSelector + ':checked');
+        if (element.val() == 'S') {
+            element.parents('tr').next().show();
+            activateSectionTemplateEditor();
+        } else {
+            element.parents('tr').next().hide();
+        }
+    }
+
+    function checkCustomCommentUsage() {
+        var element = jQuery(customCommentUseSelector + ':checked');
+        if (element.val() == 'S') {
+            element.parents('tr').next().show();
+            activateCommentTemplateEditor();
+        } else {
+            element.parents('tr').next().hide();
+        }
+    }
+
+    function checkCustomStyleUsage() {
+        var element = jQuery(customStyleSelector + ':checked');
+        if (element.val() == 'S') {
+            element.parents('tr').next().show();
+            activateStyleEditor();
+        } else {
+            element.parents('tr').next().hide();
+        }
+    }
+
     activateStyleEditor();
     activateCommentTemplateEditor();
     activateSectionTemplateEditor();
+
+    checkCustomSectionUsage();
+    checkCustomCommentUsage();
+    checkCustomStyleUsage();
 });
