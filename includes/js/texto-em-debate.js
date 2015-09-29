@@ -36,6 +36,7 @@ jQuery("document").ready(function ($) {
 
     $("span.clear-input-btn").click(function () {
         $('#txt-texto-em-debate').val("").trigger('change');
+        highlightText();
     });
 
     $('#txt-texto-em-debate').change(function () {
@@ -81,29 +82,33 @@ jQuery("document").ready(function ($) {
 
     function prevHighlight() {
         var highlights = $(".commentable-container").find(".highlight");
-        var currentHighlight = $(".commentable-container").find(".highlight.current");
-        var currentIndex = highlights.index(currentHighlight);
+        if (highlights.length > 0) {
+            var currentHighlight = $(".commentable-container").find(".highlight.current");
+            var currentIndex = highlights.index(currentHighlight);
 
-        if (currentIndex <= 0) {
-            setCurrentHighlight(highlights.last());
-            $(".current-highlight").html(highlights.length);
-        } else {
-            setCurrentHighlight(highlights.get(--currentIndex));
-            $(".current-highlight").html(currentIndex + 1);
+            if (currentIndex <= 0) {
+                setCurrentHighlight(highlights.last());
+                $(".current-highlight").html(highlights.length);
+            } else {
+                setCurrentHighlight(highlights.get(--currentIndex));
+                $(".current-highlight").html(currentIndex + 1);
+            }
         }
     }
 
     function nextHighlight() {
         var highlights = $(".commentable-container").find(".highlight");
-        var currentHighlight = $(".commentable-container").find(".highlight.current");
-        var currentIndex = highlights.index(currentHighlight);
+        if (highlights.length > 0) {
+            var currentHighlight = $(".commentable-container").find(".highlight.current");
+            var currentIndex = highlights.index(currentHighlight);
 
-        if (currentIndex >= highlights.length - 1) {
-            setCurrentHighlight(highlights.first());
-            $(".current-highlight").html(1);
-        } else {
-            setCurrentHighlight(highlights.get(++currentIndex));
-            $(".current-highlight").html(currentIndex + 1);
+            if (currentIndex >= highlights.length - 1) {
+                setCurrentHighlight(highlights.first());
+                $(".current-highlight").html(1);
+            } else {
+                setCurrentHighlight(highlights.get(++currentIndex));
+                $(".current-highlight").html(currentIndex + 1);
+            }
         }
     }
 
