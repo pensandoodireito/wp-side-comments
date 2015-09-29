@@ -5,8 +5,8 @@
         while (have_posts()) :
             the_post();
             // Include the page content template.
-            include plugin_dir_path(__FILE__) . 'content-menu-texto-template.php';
-            include plugin_dir_path(__FILE__) . 'content-texto-em-debate-template.php';
+            include CTLT_WP_SIDE_COMMENTS_PLUGIN_PATH . 'templates/content-menu-texto-template.php';
+            include CTLT_WP_SIDE_COMMENTS_PLUGIN_PATH . 'templates/content-texto-em-debate-template.php';
         endwhile;
         ?>
         <div class="back-to-top">
