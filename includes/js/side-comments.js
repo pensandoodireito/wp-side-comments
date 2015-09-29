@@ -537,7 +537,7 @@ require.register("side-comments/js/main.js", function (exports, require, module)
     SideComments.prototype.bodyClick = function (event) {
         var $target = $(event.target);
 
-        if($target.hasClass('commentable-section')){
+        if($target.hasClass('commentable-section') || $target.hasClass('searchable-content')){
             return;
         }
 
@@ -624,7 +624,10 @@ require.register("side-comments/js/section.js", function (exports, require, modu
     Section.prototype.showComment = function( event ){
         event.preventDefault();
         var target = $(event.target);
-        if(target.hasClass('commentable-section')){
+        if(target.hasClass('commentable-section') || target.hasClass('searchable-content')){
+            if(target.hasClass('searchable-content')){
+                this.$el = target.parent();
+            }
             this.select();
         }
     }
