@@ -42,6 +42,7 @@ jQuery(document).ready(function ($) {
         styleEditor = createEditor(data.styleEditorID, "ace/mode/css");
         styleEditor.setValue(css_beautify(styleEditor.getValue()));
         styleEditor.clearSelection();
+
     }
 
     function activateCommentTemplateEditor() {
@@ -88,11 +89,18 @@ jQuery(document).ready(function ($) {
         }
     }
 
-    activateStyleEditor();
-    activateCommentTemplateEditor();
-    activateSectionTemplateEditor();
+    function elementExists(){
+        return $('#'+data.styleEditorID).length != 0
+    }
 
-    checkCustomSectionUsage();
-    checkCustomCommentUsage();
-    checkCustomStyleUsage();
+    if(elementExists()){
+        activateStyleEditor();
+        activateCommentTemplateEditor();
+        activateSectionTemplateEditor();
+
+        checkCustomSectionUsage();
+        checkCustomCommentUsage();
+        checkCustomStyleUsage();
+    }
+
 });
