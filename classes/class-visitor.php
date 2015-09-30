@@ -48,6 +48,17 @@ abstract class WP_Side_Comments_Visitor
         return $this->visitorID;
     }
 
+    /**
+     * @return array
+     */
+    protected function getVoteLabels()
+    {
+        return array(
+            'upvote' => 'concordar',
+            'downvote' => 'discordar',
+        );
+    }
+
 }
 
 /**
@@ -204,6 +215,7 @@ class WP_Side_Comments_Visitor_Guest extends WP_Side_Comments_Visitor
      */
     public function isVoteValid($commentID, $action = '')
     {
+//        $labels = $this->getVoteLabels();
 
         if (!$this->allowGuestVoting) {
             return new \WP_Error('not_allowed', 'Você precisa estar logado para executar esta ação.');
@@ -211,16 +223,21 @@ class WP_Side_Comments_Visitor_Guest extends WP_Side_Comments_Visitor
 
         // @TODO: can we check cookies for a WP cookie matching current domain. If so, then ask user to log in.
         $loggedVotes = $this->retrieveLoggedVotes();
+
         // User has not yet voted on this comment
         if (empty($loggedVotes['comment_id_' . $commentID])) {
             return array();
+        } else {
+            return new \WP_Error('same_comment_vote', sprintf('Você não pode votar neste comentário de novo.'));
         }
 
+        //TODO: permitir que o usuario mude seu voto
+/*
         // Is user trying to vote twice on same comment?
         $lastAction = $loggedVotes['comment_id_' . $commentID]['last_action'];
 
-        if ($lastAction === $action) {
-            return new \WP_Error('same_action', sprintf('Você não pode %s com este comentário de novo.', $action));
+        if ($lastAction == $action) {
+            return new \WP_Error('same_action', sprintf('Você não pode %s com este comentário de novo.', $labels[$action]));
         }
 
         // Is user trying to vote too fast?
@@ -235,7 +252,7 @@ class WP_Side_Comments_Visitor_Guest extends WP_Side_Comments_Visitor
         } else {
             return new \WP_Error('voting_flood', 'Você não pode votar neste comentário novamente neste momento, aguarde ' . human_time_diff($lastVoted + $this->interval, $currentTime));
         }
-
+*/
     }
 
 }
@@ -253,7 +270,6 @@ class WP_Side_Comments_Visitor_Member extends WP_Side_Comments_Visitor
      */
     public function __construct($visitorID)
     {
-
         parent::__construct($visitorID);
     }
 
@@ -267,11 +283,12 @@ class WP_Side_Comments_Visitor_Member extends WP_Side_Comments_Visitor
      */
     public function isVoteValid($commentID, $action = '')
     {
+        $labels = $this->getVoteLabels();
 
         $comment = get_comment($commentID);
 
         if ($comment->user_id && ($this->visitorID === (int)$comment->user_id)) {
-            return new \WP_Error('upvote_own_comment', sprintf('Você não pode %s o seu próprio comentário.', $action));
+            return new \WP_Error('vote_own_comment', sprintf('Você não pode %s o seu próprio comentário.', $labels[$action]));
         }
 
         if (!is_user_logged_in()) {
@@ -283,13 +300,17 @@ class WP_Side_Comments_Visitor_Member extends WP_Side_Comments_Visitor
         // User has not yet voted on this comment
         if (empty($loggedVotes['comment_id_' . $commentID])) {
             return array();
+        } else {
+            return new \WP_Error('same_comment_vote', sprintf('Você não pode votar neste comentário de novo.'));
         }
 
+        //TODO: permitir que o usuario mude o voto
+/*
         // Is user trying to vote twice on same comment?
         $lastAction = $loggedVotes['comment_id_' . $commentID]['last_action'];
 
-        if ($lastAction === $action) {
-            return new \WP_Error('same_action', sprintf('Você não pode %s com este comentário de novo.', $action));
+        if ($lastAction == $action) {
+            return new \WP_Error('same_action', sprintf('Você não pode %s com este comentário de novo.', $labels[$action]));
         }
 
         // Is user trying to vote too fast?
@@ -304,7 +325,7 @@ class WP_Side_Comments_Visitor_Member extends WP_Side_Comments_Visitor
         } else {
             return new \WP_Error('voting_flood', 'Você não pode votar neste comentário novamente neste momento, aguarde ' . human_time_diff($lastVoted + $this->interval, $currentTime));
         }
-
+*/
     }
 
     /**

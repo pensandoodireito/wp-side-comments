@@ -900,9 +900,7 @@ class CTLT_WP_Side_Comments
     private function commentVote($userID, $commentID, $vote)
     {
 
-        $labels = $this->getVoteLabels();
-
-        $voteIsValid = $this->getVisitor()->isVoteValid($commentID, $labels[$vote]);
+        $voteIsValid = $this->getVisitor()->isVoteValid($commentID, $vote);
 
         if (is_wp_error($voteIsValid)) {
 
@@ -923,7 +921,7 @@ class CTLT_WP_Side_Comments
         $fullKarma = $this->updateFullKarma($commentID, $vote);
         $this->getVisitor()->logVote($commentID, $vote);
 
-        do_action('hmn_cp_comment_vote', $userID, $commentID, $labels[$vote]);
+        do_action('wp_side_comments_vote', $userID, $commentID, $vote);
 
         $return = array(
             'success_message' => 'Obrigado pelo seu voto!',
@@ -933,17 +931,6 @@ class CTLT_WP_Side_Comments
         );
 
         return $return;
-    }
-
-    /**
-     * @return array
-     */
-    private function getVoteLabels()
-    {
-        return array(
-            'upvote' => 'concordar',
-            'downvote' => 'discordar',
-        );
     }
 
     /**
