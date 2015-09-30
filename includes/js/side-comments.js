@@ -708,7 +708,10 @@ require.register("side-comments/js/section.js", function (exports, require, modu
         if (this.$el.find('.comment-box[data-comment="' + commentID + '"]').length > 0 && commentID != "") {
             this.$el.find('.comment-box[data-comment="' + commentID + '"]').get(0).focus();
         } else {
-            this.$el.find('.comment-form[data-parent="0"][data-comment=""] .comment-box').get(0).focus();
+            var commentBox = this.$el.find('.comment-form[data-parent="0"][data-comment=""] .comment-box').get(0);
+            if (commentBox) {
+                commentBox.focus();
+            }
         }
     };
 
