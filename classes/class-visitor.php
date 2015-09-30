@@ -56,7 +56,6 @@ abstract class WP_Side_Comments_Visitor
 class WP_Side_Comments_Visitor_Guest extends WP_Side_Comments_Visitor
 {
 
-    const KEY_GUESTS_LOGGED_VOTES = 'wp_side_comments_guests_logged_votes';
     const KEY_GUEST_LOGGED_VOTE = 'wp_side_comments_logged_guest_vote';
 
     /**
@@ -80,7 +79,6 @@ class WP_Side_Comments_Visitor_Guest extends WP_Side_Comments_Visitor
      */
     public function __construct($visitorID, $allowGuestVoting)
     {
-
         parent::__construct($visitorID);
         $this->allowGuestVoting = $allowGuestVoting;
 
@@ -100,9 +98,9 @@ class WP_Side_Comments_Visitor_Guest extends WP_Side_Comments_Visitor
 
         if (is_multisite()) {
             $blogID = get_current_blog_id();
-            $guestsLoggedVotes = get_blog_option($blogID, self::KEY_GUESTS_LOGGED_VOTES);
+            $guestsLoggedVotes = get_blog_option($blogID, self::KEY_GUEST_LOGGED_VOTE);
         } else {
-            $guestsLoggedVotes = get_option(self::KEY_GUESTS_LOGGED_VOTES);
+            $guestsLoggedVotes = get_option(self::KEY_GUEST_LOGGED_VOTE);
         }
 
         return $guestsLoggedVotes[$this->cookie];
@@ -213,7 +211,6 @@ class WP_Side_Comments_Visitor_Guest extends WP_Side_Comments_Visitor
 
         // @TODO: can we check cookies for a WP cookie matching current domain. If so, then ask user to log in.
         $loggedVotes = $this->retrieveLoggedVotes();
-
         // User has not yet voted on this comment
         if (empty($loggedVotes['comment_id_' . $commentID])) {
             return array();
