@@ -1047,8 +1047,6 @@ class CTLT_WP_Side_Comments
 
     public function refresh_nonce_callback()
     {
-        $this->checkInteractionAllowed();
-
         $data['nonce'] = wp_create_nonce('side_comments_nonce');
         $data['voting_nonce'] = wp_create_nonce('side_comments_voting_nonce');
         wp_send_json_success($data);
