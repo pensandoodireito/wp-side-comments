@@ -756,12 +756,12 @@ require.register("side-comments/js/section.js", function (exports, require, modu
         var commentBody = "";
         if (commentID != "") {
             this.$el.find(".comment-box[data-parent='" + parentID + "'][data-comment='" + commentID + "']").children().not("br").each(function () {
-                $(this).relaceWith(this.innerHTML);
+                $(this).replaceWith(this.innerHTML);
             });
             commentBody = this.$el.find('.comment-box[data-parent="' + parentID + '"][data-comment="' + commentID + '"]').html();
         } else {
             this.$el.find('.comment-form[data-parent="0"][data-comment=""] .comment-box').children().not("br").each(function () {
-                $(this).relaceWith(this.innerHTML);
+                $(this).replaceWith(this.innerHTML);
             });
             commentBody = this.$el.find('.comment-form[data-parent="0"][data-comment=""] .comment-box').html();
         }
