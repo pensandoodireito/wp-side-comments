@@ -4,7 +4,12 @@
 
 jQuery("document").ready(function ($) {
     var menutop = $('.menu-topo-mc');
-    var position = menutop.offset().top;
+
+    var position = 0;
+
+    if (menutop.length > 0){
+        position = menutop.offset().top;
+    }
 
     scrollToHash();
 
