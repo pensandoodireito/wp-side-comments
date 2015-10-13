@@ -179,8 +179,7 @@ jQuery(document).ready(function ($) {
     });
 // Adds .active to the parent p.commentable-section of .marker when clicked
 
-    $(".marker", ".side-comment").on('click', function () {
-
+    $(".marker", ".side-comment").on('click', function (e) {
         if (!$(this).parent().hasClass('active')) {
             var parent = $(this).parent().parent('p.commentable-section');
             parent.addClass('active');
@@ -196,7 +195,9 @@ jQuery(document).ready(function ($) {
         if (clicked.is('.comments-wrapper, .marker') ||
             clicked.parents().is('.comments-wrapper, .marker') ||
             clicked.hasClass('searchable-content') ||
-            clicked.hasClass('commentable-section')) {
+            clicked.hasClass('commentable-section') ||
+            clicked.parents('.commentable-section').length
+        ) {
             return; // click happened within the dialog, do nothing here
         } else { // click was outside the dialog, so close it
             $(".commentable-section").removeClass("active");
