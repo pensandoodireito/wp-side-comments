@@ -92,7 +92,7 @@ var SecaoCollection = Backbone.Collection.extend({
                 customResponse.push({
                     id: item.section_id,
                     secao : item.section_text,
-                    comentarios: comments
+                    comentarios: comments.reverse()
                 });
             });
         }
