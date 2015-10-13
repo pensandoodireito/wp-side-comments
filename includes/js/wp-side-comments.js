@@ -191,6 +191,7 @@ jQuery(document).ready(function ($) {
 
     //Removes .active from p.commentable-section when the cursor is click anywhere else but .commment-wrapper. Used to mimic same nature of side comments
     $('#content, html').on('click', function (e) {
+        //console.log('clicked: #content, html');
         var clicked = $(e.target); // get the element clicked
         if (clicked.is('.comments-wrapper, .marker') ||
             clicked.parents().is('.comments-wrapper, .marker') ||
