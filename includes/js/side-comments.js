@@ -535,9 +535,11 @@ require.register("side-comments/js/main.js", function (exports, require, module)
      * @param  {Object} event The event object.
      */
     SideComments.prototype.bodyClick = function (event) {
+        //console.log('clicked: bodyClick');
         var $target = $(event.target);
 
-        if($target.hasClass('commentable-section') || $target.hasClass('searchable-content')){
+        if($target.hasClass('commentable-section') || $target.parents('.commentable-section').length > 0
+        ){
             return;
         }
 
@@ -622,11 +624,16 @@ require.register("side-comments/js/section.js", function (exports, require, modu
     }
 
     Section.prototype.showComment = function( event ){
+        //console.log('clicked: showComment');
         event.preventDefault();
         var target = $(event.target);
-        if(target.hasClass('commentable-section') || target.hasClass('searchable-content')){
-            if(target.hasClass('searchable-content')){
-                this.$el = target.parent();
+        var context = $(target.context);
+        var showCondition = target.parents('.commentable-section').length > 0
+            && context.prop("tagName") == "SPAN"
+            && target.parent().prop("tagName") != 'A';
+        if(target.hasClass('commentable-section') || showCondition){
+            if(showCondition){
+                this.$el = target.parents('.commentable-section');
             }
             this.select();
         }
