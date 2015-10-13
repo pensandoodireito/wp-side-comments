@@ -628,10 +628,11 @@ require.register("side-comments/js/section.js", function (exports, require, modu
         event.preventDefault();
         var target = $(event.target);
         var context = $(target.context);
-        if(target.hasClass('commentable-section') ||
-            (target.parents('.commentable-section').length > 0 && context.prop("tagName") == "SPAN")
-        ){
-            if(target.parents('.commentable-section').length){
+        var showCondition = target.parents('.commentable-section').length > 0
+            && context.prop("tagName") == "SPAN"
+            && target.parent().prop("tagName") != 'A';
+        if(target.hasClass('commentable-section') || showCondition){
+            if(showCondition){
                 this.$el = target.parents('.commentable-section');
             }
             this.select();
