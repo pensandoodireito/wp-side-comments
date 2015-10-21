@@ -1100,7 +1100,8 @@ class CTLT_WP_Side_Comments
             'id' => $comment->comment_ID,
             'author' => $comment->comment_author,
             'comment_text' => $comment->comment_content,
-            'date' => $this->getFriendlyCommentTime($comment)
+            'date' => $this->getFriendlyCommentTime($comment),
+            'timestamp' => strtotime($comment->comment_date)
         );
     }
 
