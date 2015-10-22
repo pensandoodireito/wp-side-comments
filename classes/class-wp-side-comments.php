@@ -51,9 +51,6 @@ class CTLT_WP_Side_Comments
         // Add a filter to the post container
         add_filter('post_class', array($this, 'post_class__addSideCommentsClassToContainer'));
 
-        // Add p tag to the content before add side comment classes
-        add_filter('content_save_pre', 'wpautop');
-
         // Filter content_save_pre to add our specific inline classes
         add_filter('content_save_pre', array($this, 'addSideCommentsClassesToContent'));
 
@@ -236,46 +233,50 @@ class CTLT_WP_Side_Comments
      * @param string $content the post content
      * @return string $content modified post content with our classes/attributes
      */
-    public function addSideCommentsClassesToContent($content)
-    {
-        if ($this->get_current_post_type() == "texto-em-debate" && $content) {
-            $content = str_replace("\\\"", '"', $content);
+    public function addSideCommentsClassesToContent( $content ) {
 
-            $dom = new simple_html_dom($content);
+        if ( $this->get_current_post_type() == "texto-em-debate" && $content ) {
+            $content = str_replace( "\\\"", '"', $content );
 
-            $elements = $dom->find('p');
+            $dom = new simple_html_dom( $content );
 
-            foreach ($elements as $key => $element) {
+            $elements = $dom->find( 'p.commentable-section' );
+
+            foreach ( $elements as $key => $element ) {
                 if ( $element->hasAttribute( 'id' ) ) {
-                    $this->findCurrentSectionId($element);
+                    $this->findCurrentSectionId( $element );
                 }
             }
 
-            foreach ($elements as $element) {
+            foreach ( $elements as $element ) {
                 if ( ! $element->hasAttribute( 'id' ) || ! $element->hasAttribute( 'data-section-id' ) || $element->getAttribute( 'data-section-id' ) == 0 ) {
-                    self::$currentSectionID++;
-                    $element->setAttribute('class', 'commentable-section');
-                    $element->setAttribute('data-section-id', self::$currentSectionID);
-                    $element->setAttribute('id', 'commentable-section-' . self::$currentSectionID);
+                    self::$currentSectionID ++;
+                    $element->setAttribute( 'class', 'commentable-section' );
+                    $element->setAttribute( 'data-section-id', self::$currentSectionID );
+                    $element->setAttribute( 'id', 'commentable-section-' . self::$currentSectionID );
                 }
             }
 
             return $dom->save();
         }
+
         return $content;
     }
 
-    public function addSearchableClassesToContent($content)
-    {
-        if ($this->get_current_post_type() == "texto-em-debate" && $content) {
-            $dom = new simple_html_dom($content);
+    public function addSearchableClassesToContent( $content ) {
 
-            foreach ($dom->childNodes() as $node) {
-                $node->innertext = '<span class="searchable-content">' . $node->innertext . '</span>';
+        if ( $this->get_current_post_type() == "texto-em-debate" && $content ) {
+            $dom = new simple_html_dom( $content );
+
+            foreach ( $dom->childNodes() as $node ) {
+                if ( $node->class == 'commentable-section' ) {
+                    $node->innertext = '<span class="searchable-content">' . $node->innertext . '</span>';
+                }
             }
 
             return $dom->save();
         }
+
         return $content;
     }
 
