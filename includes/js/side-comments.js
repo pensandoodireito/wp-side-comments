@@ -538,8 +538,8 @@ require.register("side-comments/js/main.js", function (exports, require, module)
         //console.log('clicked: bodyClick');
         var $target = $(event.target);
 
-        if($target.hasClass('commentable-section') || $target.parents('.commentable-section').length > 0
-        ){
+        if ($target.hasClass('commentable-section') || $target.parents('.commentable-section').length > 0
+        ) {
             return;
         }
 
@@ -623,7 +623,7 @@ require.register("side-comments/js/section.js", function (exports, require, modu
         this.render();
     }
 
-    Section.prototype.showComment = function( event ){
+    Section.prototype.showComment = function (event) {
         //console.log('clicked: showComment');
         event.preventDefault();
         var target = $(event.target);
@@ -631,8 +631,8 @@ require.register("side-comments/js/section.js", function (exports, require, modu
         var showCondition = target.parents('.commentable-section').length > 0
             && context.prop("tagName") == "SPAN"
             && target.parent().prop("tagName") != 'A';
-        if(target.hasClass('commentable-section') || showCondition){
-            if(showCondition){
+        if (target.hasClass('commentable-section') || showCondition) {
+            if (showCondition) {
                 this.$el = target.parents('.commentable-section');
             }
             this.select();
@@ -798,7 +798,7 @@ require.register("side-comments/js/section.js", function (exports, require, modu
 
         if (comment.parentID != "0") {
             var parentID = comment.parentID,
-                parentOfCurrent = this.$el.find('li[data-comment-id="'+parentID+'"]');
+                parentOfCurrent = this.$el.find('li[data-comment-id="' + parentID + '"]');
             if (parentOfCurrent.find('ul[data-root-id="' + parentID + '"]').length == 0) {
                 parentOfCurrent.append('<ul class="comments" data-root-id="' + parentID + '"></ul>');
             }

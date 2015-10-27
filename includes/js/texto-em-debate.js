@@ -7,7 +7,7 @@ jQuery("document").ready(function ($) {
 
     var position = 0;
 
-    if (menutop.length > 0){
+    if (menutop.length > 0) {
         position = menutop.offset().top;
     }
 
