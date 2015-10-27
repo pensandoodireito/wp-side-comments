@@ -246,13 +246,13 @@ class CTLT_WP_Side_Comments
             $elements = $dom->find('p');
 
             foreach ($elements as $key => $element) {
-                if ($element->hasAttribute('data-section-id')) {
+                if ( $element->hasAttribute( 'id' ) ) {
                     $this->findCurrentSectionId($element);
                 }
             }
 
             foreach ($elements as $element) {
-                if (!$element->hasAttribute('data-section-id')) {
+                if ( ! $element->hasAttribute( 'id' ) || ! $element->hasAttribute( 'data-section-id' ) || $element->getAttribute( 'data-section-id' ) == 0 ) {
                     self::$currentSectionID++;
                     $element->setAttribute('class', 'commentable-section');
                     $element->setAttribute('data-section-id', self::$currentSectionID);
