@@ -79,7 +79,8 @@ class CommentWidgetFront extends WP_Widget {
         echo $args['after_widget'];
         add_action( 'wp_footer', 'last_comment_init_script' );
         wp_enqueue_script('backbone');
-        wp_register_script( 'last-comments-debate', CTLT_WP_SIDE_COMMENTS_PLUGIN_URL . 'includes/js/last-comments.js', array ( 'backbone', 'jquery' ) );
+        wp_register_script( 'jquery-sort-elements', CTLT_WP_SIDE_COMMENTS_PLUGIN_URL . 'includes/js/jquery.sortElements.js', array ( 'backbone', 'jquery' ) );
+        wp_register_script( 'last-comments-debate', CTLT_WP_SIDE_COMMENTS_PLUGIN_URL . 'includes/js/last-comments.js', array ( 'jquery-sort-elements' ) );
         wp_localize_script( 'last-comments-debate', 'commentFrontParams',
             array(
             'post_id'=> $post->ID,
@@ -87,6 +88,7 @@ class CommentWidgetFront extends WP_Widget {
             'nonce' => wp_create_nonce('side_comments_last_comments_nonce'),
             'delay' => $instance['delay']
             ));
+        wp_enqueue_script('jquery-sort-elements');
         wp_enqueue_script('last-comments-debate');
     }
 
