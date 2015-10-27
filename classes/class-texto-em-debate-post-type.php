@@ -25,7 +25,11 @@ class Texto_Em_Debate_Post_Type
         //register post type actions and filters
         add_action('the_content', array($this, 'wp_side_comments_parse_headers'));
         add_filter('texto_em_debate_menu_items', array($this, 'wp_side_comments_create_menu_items'));
-        add_filter('tiny_mce_before_init', array($this, 'editor_visual_novas_cores'));
+        add_filter( 'tiny_mce_before_init', array( $this, 'editor_visual_novas_cores' ) );
+        add_filter( 'tiny_mce_before_init', array( $this, 'editor_visual_custom_styles' ) );
+        add_filter( 'mce_buttons_2', array( $this, 'editor_visual_custom_styles_buttons' ) );
+        add_filter( 'mce_css', array( $this, 'editor_visual_css' ) );
+
     }
 
     /**
@@ -90,17 +94,73 @@ class Texto_Em_Debate_Post_Type
      * @param $init
      * @return mixed
      */
-    public function editor_visual_novas_cores($init)
-    {
+    public function editor_visual_novas_cores( $init ) {
 
-        if (get_post_type() == "texto-em-debate") {
+        if ( get_post_type() == "texto-em-debate" ) {
 
-            $init['textcolor_map'] = '[' . self::$cores_texto_debate_editor . ']'; // build colour grid default+custom colors
+            $init['textcolor_map']  = '[' . self::$cores_texto_debate_editor . ']'; // build colour grid default+custom colors
             $init['textcolor_rows'] = 3; // enable 6th row for custom colours in grid
-            return $init;
-        } else {
-            return $init;
         }
+
+        return $init;
+    }
+
+    /**
+     * Adiciona os botões de estilo customizado ao editor
+     *
+     * @param $buttons
+     *
+     * @return mixed
+     */
+    public function editor_visual_custom_styles_buttons( $buttons ) {
+
+        if ( get_post_type() == "texto-em-debate" ) {
+            array_unshift( $buttons, 'styleselect' );
+        }
+
+        return $buttons;
+    }
+
+    /**
+     * Cria estilos personalizados para o editor de texto visual
+     * @param $init
+     *
+     * @return mixed
+     */
+    public function editor_visual_custom_styles( $init ) {
+
+        if ( get_post_type() == "texto-em-debate" ) {
+            $formats = array(
+                array(
+                    'title'      => 'Parágrafo Comentável',
+                    'block'      => 'p',
+                    'classes'    => 'commentable-section',
+                    'attributes' => array( 'data-section-id' => '0' )
+                )
+            );
+
+            $init['style_formats'] = json_encode( $formats );
+        }
+
+        return $init;
+    }
+
+    /**
+     * Adiciona CSS referente aos estilos customizados
+     * @param $css
+     *
+     * @return string
+     */
+    function editor_visual_css( $css ) {
+        if ( get_post_type() == "texto-em-debate" ) {
+            if ( ! empty( $css ) ) {
+                $css .= ',';
+            }
+
+            $css .= CTLT_WP_SIDE_COMMENTS_PLUGIN_URL . 'includes/css/editor-style.css';
+        }
+
+        return $css;
     }
 
     /**
