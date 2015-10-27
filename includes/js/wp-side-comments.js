@@ -55,18 +55,18 @@ jQuery(document).ready(function ($) {
 
     // We need to listen for the post and delete events and post an AJAX response back to PHP
     sideComments.on('commentPosted', function (comment) {
-        var section = $('#commentable-section-'+this.activeSection.id);
+        var section = $('#commentable-section-' + this.activeSection.id);
         var parentID = comment.parentID;
         var parent = null;
-        if (parentID){
-            parent = $(section).find('.comment-form[data-comment='+parentID+']');
-        }else{
+        if (parentID) {
+            parent = $(section).find('.comment-form[data-comment=' + parentID + ']');
+        } else {
             parent = $(section).find('.comments-wrapper > .comment-form');
         }
 
-        var commentText = comment.comment.replace(/&nbsp;/g,' ');
+        var commentText = comment.comment.replace(/&nbsp;/g, ' ');
 
-        if (commentText.trim().length>0) {
+        if (commentText.trim().length > 0) {
             $.ajax({
                 url: ajaxURL,
                 dataType: 'json',
@@ -118,7 +118,7 @@ jQuery(document).ready(function ($) {
 
                 }
             });
-        }else{
+        } else {
             var erro = $('.hidden > .alert-warning').clone();
             erro.find('p').html("Você não pode enviar um comentário vazio.");
             erro.hide().insertBefore(parent).fadeIn(1000).delay(5000).slideUp(1000, function () {
@@ -208,15 +208,15 @@ jQuery(document).ready(function ($) {
     });
 
     //When clicked browser scrolls to top of item
-    $(".marker").on('click', function (e){
+    $(".marker").on('click', function (e) {
         var target = $(e.target);
-		var sectionSelected = target.parents(".commentable-section.active");
+        var sectionSelected = target.parents(".commentable-section.active");
         var menuTopo = $('.menu-topo-mc');
         var scrollPos = sectionSelected.offset().top;
-        if(menuTopo.hasClass('fixed-top-mc')){
+        if (menuTopo.hasClass('fixed-top-mc')) {
             scrollPos -= menuTopo.outerHeight(true);
-        }else{
-            scrollPos -= menuTopo.outerHeight(true)*2;
+        } else {
+            scrollPos -= menuTopo.outerHeight(true) * 2;
         }
         $('body,html').animate({
             scrollTop: scrollPos
