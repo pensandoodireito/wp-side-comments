@@ -63,7 +63,8 @@ var SecaoView = Backbone.View.extend({
             if(quantSection >= 3){
                 _this.$el.find('.comments-col:visible').first().hide(500);
             }
-            $(this.template(this.model.attributes)).hide().appendTo(this.$el).fadeIn(1000);
+            $(this.template(this.model.attributes)).attr('data-id', _this.model.attributes.id).hide()
+                .appendTo(this.$el).fadeIn(1000);
         }
 
         this.model.attributes.comentarios.forEach(function( item ){
@@ -122,12 +123,20 @@ var secaoCollection = new SecaoCollection();
                         className = "two-col";
                         break;
                 }
-                $('.comments-main div').first().removeClass().addClass(className);
-
+                var mainElement = $('.comments-main div:first');
+                mainElement.removeClass().addClass(className);
+                var newOrder = [];
                 secaoCollection.models.forEach(function(secao){
-                    secaoView = new SecaoView({model: secao, el: $('.comments-main div').first()});
+                    newOrder.push(secao.id);
+                    secaoView = new SecaoView({model: secao, el: mainElement});
                     secaoView.render();
                 });
+
+                mainElement.find('.comments-col').sortElements(function(a, b){
+                    return newOrder.indexOf($(a).attr('data-id')) > newOrder.indexOf($(b).attr('data-id'));
+                });
+
+                newOrder = [];
             }
         });
     };
