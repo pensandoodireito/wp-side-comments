@@ -89,11 +89,11 @@ jQuery(document).ready(function ($) {
         }
     }
 
-    function elementExists(){
-        return $('#'+data.styleEditorID).length != 0
+    function elementExists() {
+        return $('#' + data.styleEditorID).length != 0
     }
 
-    if(elementExists()){
+    if (elementExists()) {
         activateStyleEditor();
         activateCommentTemplateEditor();
         activateSectionTemplateEditor();

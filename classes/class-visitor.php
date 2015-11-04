@@ -8,358 +8,342 @@
 /**
  * Class WP_Side_Comments_Visitor
  */
-abstract class WP_Side_Comments_Visitor
-{
-    const KEY_PREFIX = 'wp_side_comments';
-    const KEY_VOTING_INTERVAL = 'wp_side_comments_voting_interval';
-    const KEY_COOKIE_EXPIRY = 'wp_side_comments_cookie_expiry';
-    const KEY_COOKIE_NAME = 'wp_side_comments_visitor';
+abstract class WP_Side_Comments_Visitor {
+	const KEY_PREFIX = 'wp_side_comments';
+	const KEY_VOTING_INTERVAL = 'wp_side_comments_voting_interval';
+	const KEY_COOKIE_EXPIRY = 'wp_side_comments_cookie_expiry';
+	const KEY_COOKIE_NAME = 'wp_side_comments_visitor';
 
-    protected $visitorID;
+	protected $visitorID;
 
-    /**
-     * Time needed between 2 votes by user on same comment.
-     *
-     * @var mixed|void
-     */
-    protected $interval;
+	/**
+	 * Time needed between 2 votes by user on same comment.
+	 *
+	 * @var mixed|void
+	 */
+	protected $interval;
 
-    /**
-     * Creates a new HMN_CP_Visitor object.
-     */
-    public function __construct($visitorID)
-    {
-        $this->visitorID = $visitorID;
-        $this->interval = apply_filters(self::KEY_VOTING_INTERVAL, 15 * MINUTE_IN_SECONDS);
-    }
+	/**
+	 * Creates a new HMN_CP_Visitor object.
+	 */
+	public function __construct( $visitorID ) {
+		$this->visitorID = $visitorID;
+		$this->interval  = apply_filters( self::KEY_VOTING_INTERVAL, 15 * MINUTE_IN_SECONDS );
+	}
 
-    /**
-     * @return mixed
-     */
-    abstract function logVote($commentID, $action);
+	/**
+	 * @return mixed
+	 */
+	abstract function logVote( $commentID, $action );
 
-    abstract function isVoteValid($commentID, $action = '');
+	abstract function isVoteValid( $commentID, $action = '' );
 
-    /**
-     * @return string
-     */
-    public function getId()
-    {
-        return $this->visitorID;
-    }
+	/**
+	 * @return string
+	 */
+	public function getId() {
+		return $this->visitorID;
+	}
 
-    /**
-     * @return array
-     */
-    protected function getVoteLabels()
-    {
-        return array(
-            'upvote' => 'concordar',
-            'downvote' => 'discordar',
-        );
-    }
+	/**
+	 * @return array
+	 */
+	protected function getVoteLabels() {
+		return array(
+			'upvote'   => 'concordar',
+			'downvote' => 'discordar',
+		);
+	}
 
 }
 
 /**
  * Class WP_Side_Comments_Visitor_Guest
  */
-class WP_Side_Comments_Visitor_Guest extends WP_Side_Comments_Visitor
-{
+class WP_Side_Comments_Visitor_Guest extends WP_Side_Comments_Visitor {
 
-    const KEY_GUEST_LOGGED_VOTE = 'wp_side_comments_logged_guest_vote';
+	const KEY_GUEST_LOGGED_VOTE = 'wp_side_comments_logged_guest_vote';
 
-    /**
-     * Stores the IP address.
-     *
-     * @var string
-     */
-    protected $cookie;
+	/**
+	 * Stores the IP address.
+	 *
+	 * @var string
+	 */
+	protected $cookie;
 
-    protected $loggedVotes;
+	protected $loggedVotes;
 
-    /**
-     * Controls if a guest user can vote on a comment
-     * @var $allowGuestVoting
-     */
-    protected $allowGuestVoting;
+	/**
+	 * Controls if a guest user can vote on a comment
+	 * @var $allowGuestVoting
+	 */
+	protected $allowGuestVoting;
 
 
-    /**
-     * @param $visitorID
-     */
-    public function __construct($visitorID, $allowGuestVoting)
-    {
-        parent::__construct($visitorID);
-        $this->allowGuestVoting = $allowGuestVoting;
+	/**
+	 * @param $visitorID
+	 */
+	public function __construct( $visitorID, $allowGuestVoting ) {
+		parent::__construct( $visitorID );
+		$this->allowGuestVoting = $allowGuestVoting;
 
-        $this->setCookie();
+		$this->setCookie();
 
-        $this->retrieveLoggedVotes();
-    }
+		$this->retrieveLoggedVotes();
+	}
 
-    /**
-     * Retrieves the logged votes from the DB option and returns those belonging to
-     * the IP address in the cookie.
-     *
-     * @return mixed
-     */
-    protected function retrieveLoggedVotes()
-    {
+	/**
+	 * Retrieves the logged votes from the DB option and returns those belonging to
+	 * the IP address in the cookie.
+	 *
+	 * @return mixed
+	 */
+	protected function retrieveLoggedVotes() {
 
-        if (is_multisite()) {
-            $blogID = get_current_blog_id();
-            $guestsLoggedVotes = get_blog_option($blogID, self::KEY_GUEST_LOGGED_VOTE);
-        } else {
-            $guestsLoggedVotes = get_option(self::KEY_GUEST_LOGGED_VOTE);
-        }
+		if ( is_multisite() ) {
+			$blogID            = get_current_blog_id();
+			$guestsLoggedVotes = get_blog_option( $blogID, self::KEY_GUEST_LOGGED_VOTE );
+		} else {
+			$guestsLoggedVotes = get_option( self::KEY_GUEST_LOGGED_VOTE );
+		}
 
-        return $guestsLoggedVotes[$this->cookie];
-    }
+		return $guestsLoggedVotes[ $this->cookie ];
+	}
 
-    /**
-     *
-     * @return mixed
-     */
-    public function getCookie()
-    {
-        return $this->cookie;
-    }
+	/**
+	 *
+	 * @return mixed
+	 */
+	public function getCookie() {
+		return $this->cookie;
+	}
 
-    /**
-     *
-     */
-    public function setCookie()
-    {
+	/**
+	 *
+	 */
+	public function setCookie() {
 
-        // Set a cookie with the visitor IP address that expires in a week.
-        $expiry = apply_filters(self::KEY_COOKIE_EXPIRY, time() + (7 * DAY_IN_SECONDS));
+		// Set a cookie with the visitor IP address that expires in a week.
+		$expiry = apply_filters( self::KEY_COOKIE_EXPIRY, time() + ( 7 * DAY_IN_SECONDS ) );
 
-        //Set a cookie now to see if they are supported by the browser.
-        $secure = ('https' === parse_url(site_url(), PHP_URL_SCHEME) && 'https' === parse_url(home_url(), PHP_URL_SCHEME));
+		//Set a cookie now to see if they are supported by the browser.
+		$secure = ( 'https' === parse_url( site_url(), PHP_URL_SCHEME ) && 'https' === parse_url( home_url(), PHP_URL_SCHEME ) );
 
-        setcookie(self::KEY_COOKIE_NAME, $this->visitorID, $expiry, COOKIEPATH, COOKIE_DOMAIN, $secure);
-        if (SITECOOKIEPATH != COOKIEPATH) {
-            setcookie(self::KEY_COOKIE_NAME, $this->visitorID, $expiry, SITECOOKIEPATH, COOKIE_DOMAIN, $secure);
-        }
+		setcookie( self::KEY_COOKIE_NAME, $this->visitorID, $expiry, COOKIEPATH, COOKIE_DOMAIN, $secure );
+		if ( SITECOOKIEPATH != COOKIEPATH ) {
+			setcookie( self::KEY_COOKIE_NAME, $this->visitorID, $expiry, SITECOOKIEPATH, COOKIE_DOMAIN, $secure );
+		}
 
-        // Make cookie available immediately by setting value manually.
-        $_COOKIE[self::KEY_COOKIE_NAME] = $this->visitorID;
+		// Make cookie available immediately by setting value manually.
+		$_COOKIE[ self::KEY_COOKIE_NAME ] = $this->visitorID;
 
-        $this->cookie = $_COOKIE[self::KEY_COOKIE_NAME];
-    }
+		$this->cookie = $_COOKIE[ self::KEY_COOKIE_NAME ];
+	}
 
-    /**
-     * Save the user's vote to an option.
-     *
-     * @param $commentID
-     * @param $action
-     *
-     * @return mixed
-     */
-    public function logVote($commentID, $action)
-    {
+	/**
+	 * Save the user's vote to an option.
+	 *
+	 * @param $commentID
+	 * @param $action
+	 *
+	 * @return mixed
+	 */
+	public function logVote( $commentID, $action ) {
 
-        $loggedVotes = $this->retrieveLoggedVotes();
+		$loggedVotes = $this->retrieveLoggedVotes();
 
-        $loggedVotes['comment_id_' . $commentID]['vote_time'] = current_time('timestamp');
-        $loggedVotes['comment_id_' . $commentID]['last_action'] = $action;
+		$loggedVotes[ 'comment_id_' . $commentID ]['vote_time']   = current_time( 'timestamp' );
+		$loggedVotes[ 'comment_id_' . $commentID ]['last_action'] = $action;
 
-        $this->saveLoggedVotes($loggedVotes);
+		$this->saveLoggedVotes( $loggedVotes );
 
-        $loggedVotes = $this->retrieveLoggedVotes();
+		$loggedVotes = $this->retrieveLoggedVotes();
 
-        $updated = $loggedVotes['comment_id_' . $commentID];
+		$updated = $loggedVotes[ 'comment_id_' . $commentID ];
 
-        /**
-         * Fires once the user meta has been updated.
-         *
-         * @param int $visitor_id
-         * @param int $commentID
-         * @param array $updated
-         */
-        do_action(self::KEY_GUEST_LOGGED_VOTE, $this->visitorID, $commentID, $updated);
+		/**
+		 * Fires once the user meta has been updated.
+		 *
+		 * @param int $visitor_id
+		 * @param int $commentID
+		 * @param array $updated
+		 */
+		do_action( self::KEY_GUEST_LOGGED_VOTE, $this->visitorID, $commentID, $updated );
 
-        return $updated;
+		return $updated;
 
-    }
+	}
 
-    /**
-     * Save the votes for the current guest to the DB option.
-     *
-     * @param $votes
-     */
-    protected function saveLoggedVotes($votes)
-    {
+	/**
+	 * Save the votes for the current guest to the DB option.
+	 *
+	 * @param $votes
+	 */
+	protected function saveLoggedVotes( $votes ) {
 
-        $loggedVotes = array();
+		$loggedVotes = array();
 
-        if (is_multisite()) {
-            $blogID = get_current_blog_id();
-            $loggedVotes = get_blog_option($blogID, self::KEY_GUEST_LOGGED_VOTE);
-            $loggedVotes[$this->visitorID] = $votes;
-            update_blog_option($blogID, self::KEY_GUEST_LOGGED_VOTE, $loggedVotes);
-        } else {
-            $loggedVotes[$this->visitorID] = $votes;
-            update_option(self::KEY_GUEST_LOGGED_VOTE, $loggedVotes);
-        }
-    }
+		if ( is_multisite() ) {
+			$blogID                          = get_current_blog_id();
+			$loggedVotes                     = get_blog_option( $blogID, self::KEY_GUEST_LOGGED_VOTE );
+			$loggedVotes[ $this->visitorID ] = $votes;
+			update_blog_option( $blogID, self::KEY_GUEST_LOGGED_VOTE, $loggedVotes );
+		} else {
+			$loggedVotes[ $this->visitorID ] = $votes;
+			update_option( self::KEY_GUEST_LOGGED_VOTE, $loggedVotes );
+		}
+	}
 
-    /**
-     * Determine if the guest visitor can vote.
-     *
-     * @param        $commentID
-     * @param string $action
-     *
-     * @return bool|WP_Error
-     */
-    public function isVoteValid($commentID, $action = '')
-    {
+	/**
+	 * Determine if the guest visitor can vote.
+	 *
+	 * @param        $commentID
+	 * @param string $action
+	 *
+	 * @return bool|WP_Error
+	 */
+	public function isVoteValid( $commentID, $action = '' ) {
 //        $labels = $this->getVoteLabels();
 
-        if (!$this->allowGuestVoting) {
-            return new \WP_Error('not_allowed', 'Você precisa estar logado para executar esta ação.');
-        }
+		if ( ! $this->allowGuestVoting ) {
+			return new \WP_Error( 'not_allowed', 'Você precisa estar logado para executar esta ação.' );
+		}
 
-        // @TODO: can we check cookies for a WP cookie matching current domain. If so, then ask user to log in.
-        $loggedVotes = $this->retrieveLoggedVotes();
+		// @TODO: can we check cookies for a WP cookie matching current domain. If so, then ask user to log in.
+		$loggedVotes = $this->retrieveLoggedVotes();
 
-        // User has not yet voted on this comment
-        if (empty($loggedVotes['comment_id_' . $commentID])) {
-            return array();
-        } else {
-            return new \WP_Error('same_comment_vote', sprintf('Você não pode votar neste comentário de novo.'));
-        }
+		// User has not yet voted on this comment
+		if ( empty( $loggedVotes[ 'comment_id_' . $commentID ] ) ) {
+			return array();
+		} else {
+			return new \WP_Error( 'same_comment_vote', sprintf( 'Você não pode votar neste comentário de novo.' ) );
+		}
 
-        //TODO: permitir que o usuario mude seu voto
-/*
-        // Is user trying to vote twice on same comment?
-        $lastAction = $loggedVotes['comment_id_' . $commentID]['last_action'];
+		//TODO: permitir que o usuario mude seu voto
+		/*
+				// Is user trying to vote twice on same comment?
+				$lastAction = $loggedVotes['comment_id_' . $commentID]['last_action'];
 
-        if ($lastAction == $action) {
-            return new \WP_Error('same_action', sprintf('Você não pode %s com este comentário de novo.', $labels[$action]));
-        }
+				if ($lastAction == $action) {
+					return new \WP_Error('same_action', sprintf('Você não pode %s com este comentário de novo.', $labels[$action]));
+				}
 
-        // Is user trying to vote too fast?
-        $lastVoted = $loggedVotes['comment_id_' . $commentID]['vote_time'];
+				// Is user trying to vote too fast?
+				$lastVoted = $loggedVotes['comment_id_' . $commentID]['vote_time'];
 
-        $currentTime = current_time('timestamp');
+				$currentTime = current_time('timestamp');
 
-        $elapsedTime = $currentTime - $lastVoted;
+				$elapsedTime = $currentTime - $lastVoted;
 
-        if ($elapsedTime > $this->interval) {
-            return true; // user can vote, has been over 15 minutes since last vote.
-        } else {
-            return new \WP_Error('voting_flood', 'Você não pode votar neste comentário novamente neste momento, aguarde ' . human_time_diff($lastVoted + $this->interval, $currentTime));
-        }
-*/
-    }
+				if ($elapsedTime > $this->interval) {
+					return true; // user can vote, has been over 15 minutes since last vote.
+				} else {
+					return new \WP_Error('voting_flood', 'Você não pode votar neste comentário novamente neste momento, aguarde ' . human_time_diff($lastVoted + $this->interval, $currentTime));
+				}
+		*/
+	}
 
 }
 
 /**
  * Class WP_Side_Comments_Visitor_Member
  */
-class WP_Side_Comments_Visitor_Member extends WP_Side_Comments_Visitor
-{
-    const KEY_COMMENTS_VOTED_ON = 'wp_side_comments_comments_voted_on';
-    const KEY_UPDATE_COMMENTS_VOTED_ON = 'wp_side_comments_update_comments_voted_on_for_user';
+class WP_Side_Comments_Visitor_Member extends WP_Side_Comments_Visitor {
+	const KEY_COMMENTS_VOTED_ON = 'wp_side_comments_comments_voted_on';
+	const KEY_UPDATE_COMMENTS_VOTED_ON = 'wp_side_comments_update_comments_voted_on_for_user';
 
-    /**
-     * @param $visitorID WP User ID.
-     */
-    public function __construct($visitorID)
-    {
-        parent::__construct($visitorID);
-    }
+	/**
+	 * @param $visitorID WP User ID.
+	 */
+	public function __construct( $visitorID ) {
+		parent::__construct( $visitorID );
+	}
 
-    /**
-     * Determine if the user can vote.
-     *
-     * @param        $commentID
-     * @param string $action
-     *
-     * @return bool|WP_Error
-     */
-    public function isVoteValid($commentID, $action = '')
-    {
-        $labels = $this->getVoteLabels();
+	/**
+	 * Determine if the user can vote.
+	 *
+	 * @param        $commentID
+	 * @param string $action
+	 *
+	 * @return bool|WP_Error
+	 */
+	public function isVoteValid( $commentID, $action = '' ) {
+		$labels = $this->getVoteLabels();
 
-        $comment = get_comment($commentID);
+		$comment = get_comment( $commentID );
 
-        if ($comment->user_id && ($this->visitorID === (int)$comment->user_id)) {
-            return new \WP_Error('vote_own_comment', sprintf('Você não pode %s o seu próprio comentário.', $labels[$action]));
-        }
+		if ( $comment->user_id && ( $this->visitorID === (int) $comment->user_id ) ) {
+			return new \WP_Error( 'vote_own_comment', sprintf( 'Você não pode %s o seu próprio comentário.', $labels[ $action ] ) );
+		}
 
-        if (!is_user_logged_in()) {
-            return new \WP_Error('not_logged_in', 'Você não está logado para votar nos comentários');
-        }
+		if ( ! is_user_logged_in() ) {
+			return new \WP_Error( 'not_logged_in', 'Você não está logado para votar nos comentários' );
+		}
 
-        $loggedVotes = get_user_option(self::KEY_COMMENTS_VOTED_ON, $this->visitorID);
+		$loggedVotes = get_user_option( self::KEY_COMMENTS_VOTED_ON, $this->visitorID );
 
-        // User has not yet voted on this comment
-        if (empty($loggedVotes['comment_id_' . $commentID])) {
-            return array();
-        } else {
-            return new \WP_Error('same_comment_vote', sprintf('Você não pode votar neste comentário de novo.'));
-        }
+		// User has not yet voted on this comment
+		if ( empty( $loggedVotes[ 'comment_id_' . $commentID ] ) ) {
+			return array();
+		} else {
+			return new \WP_Error( 'same_comment_vote', sprintf( 'Você não pode votar neste comentário de novo.' ) );
+		}
 
-        //TODO: permitir que o usuario mude o voto
-/*
-        // Is user trying to vote twice on same comment?
-        $lastAction = $loggedVotes['comment_id_' . $commentID]['last_action'];
+		//TODO: permitir que o usuario mude o voto
+		/*
+				// Is user trying to vote twice on same comment?
+				$lastAction = $loggedVotes['comment_id_' . $commentID]['last_action'];
 
-        if ($lastAction == $action) {
-            return new \WP_Error('same_action', sprintf('Você não pode %s com este comentário de novo.', $labels[$action]));
-        }
+				if ($lastAction == $action) {
+					return new \WP_Error('same_action', sprintf('Você não pode %s com este comentário de novo.', $labels[$action]));
+				}
 
-        // Is user trying to vote too fast?
-        $lastVoted = $loggedVotes['comment_id_' . $commentID]['vote_time'];
+				// Is user trying to vote too fast?
+				$lastVoted = $loggedVotes['comment_id_' . $commentID]['vote_time'];
 
-        $currentTime = current_time('timestamp');
+				$currentTime = current_time('timestamp');
 
-        $elapsedTime = $currentTime - $lastVoted;
+				$elapsedTime = $currentTime - $lastVoted;
 
-        if ($elapsedTime > $this->interval) {
-            return true; // user can vote, has been over 15 minutes since last vote.
-        } else {
-            return new \WP_Error('voting_flood', 'Você não pode votar neste comentário novamente neste momento, aguarde ' . human_time_diff($lastVoted + $this->interval, $currentTime));
-        }
-*/
-    }
+				if ($elapsedTime > $this->interval) {
+					return true; // user can vote, has been over 15 minutes since last vote.
+				} else {
+					return new \WP_Error('voting_flood', 'Você não pode votar neste comentário novamente neste momento, aguarde ' . human_time_diff($lastVoted + $this->interval, $currentTime));
+				}
+		*/
+	}
 
-    /**
-     * Save the user's vote to user meta.
-     *
-     * @param $commentID
-     * @param $action
-     *
-     * @return mixed
-     */
-    public function logVote($commentID, $action)
-    {
+	/**
+	 * Save the user's vote to user meta.
+	 *
+	 * @param $commentID
+	 * @param $action
+	 *
+	 * @return mixed
+	 */
+	public function logVote( $commentID, $action ) {
 
-        $commentsVotedOn = get_user_option(self::KEY_COMMENTS_VOTED_ON, $this->visitorID);
+		$commentsVotedOn = get_user_option( self::KEY_COMMENTS_VOTED_ON, $this->visitorID );
 
-        $commentsVotedOn['comment_id_' . $commentID]['vote_time'] = current_time('timestamp');
-        $commentsVotedOn['comment_id_' . $commentID]['last_action'] = $action;
+		$commentsVotedOn[ 'comment_id_' . $commentID ]['vote_time']   = current_time( 'timestamp' );
+		$commentsVotedOn[ 'comment_id_' . $commentID ]['last_action'] = $action;
 
-        update_user_option($this->visitorID, self::KEY_COMMENTS_VOTED_ON, $commentsVotedOn);
+		update_user_option( $this->visitorID, self::KEY_COMMENTS_VOTED_ON, $commentsVotedOn );
 
-        $commentsVotedOn = get_user_option(self::KEY_COMMENTS_VOTED_ON, $this->visitorID);
+		$commentsVotedOn = get_user_option( self::KEY_COMMENTS_VOTED_ON, $this->visitorID );
 
-        $updated = $commentsVotedOn['comment_id_' . $commentID];
+		$updated = $commentsVotedOn[ 'comment_id_' . $commentID ];
 
-        /**
-         * Fires once the user meta has been updated.
-         *
-         * @param int $visitor_id
-         * @param int $commentID
-         * @param array $updated
-         */
-        do_action(self::KEY_UPDATE_COMMENTS_VOTED_ON, $this->visitorID, $commentID, $updated);
+		/**
+		 * Fires once the user meta has been updated.
+		 *
+		 * @param int $visitor_id
+		 * @param int $commentID
+		 * @param array $updated
+		 */
+		do_action( self::KEY_UPDATE_COMMENTS_VOTED_ON, $this->visitorID, $commentID, $updated );
 
-        return $updated;
-    }
+		return $updated;
+	}
 
 }
