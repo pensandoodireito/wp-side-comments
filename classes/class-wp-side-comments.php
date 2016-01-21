@@ -11,7 +11,7 @@
 require_once CTLT_WP_SIDE_COMMENTS_PLUGIN_PATH . 'classes/class-side-comments-walker.php';
 
 //includes required classes for html parsing
-require_once CTLT_WP_SIDE_COMMENTS_PLUGIN_PATH . 'classes/simple_html_dom.php';
+//require_once CTLT_WP_SIDE_COMMENTS_PLUGIN_PATH . 'classes/simple_html_dom.php';
 
 //includes required classes for comment voting
 require_once CTLT_WP_SIDE_COMMENTS_PLUGIN_PATH . 'classes/class-visitor.php';
