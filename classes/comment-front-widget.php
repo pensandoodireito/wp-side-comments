@@ -16,9 +16,9 @@ class CommentWidgetFront extends WP_Widget {
 	// Creating widget front-end
 	// This is where the action happens
 	public function widget( $args, $instance ) {
-		$title = apply_filters( 'widget_title', $instance['title'] );
-		// before and after widget arguments are defined by themes
-		$post = get_post( $instance['textID'] );
+		$title     = apply_filters( 'widget_title', $instance['title'] );
+		$post      = get_post( $instance['textID'] );
+		$permalink = get_permalink( $post );
 		echo $args['before_widget'];
 		?>
 
@@ -42,7 +42,7 @@ class CommentWidgetFront extends WP_Widget {
 		</div>
 		<div class="row">
 			<div class="col-md-12 text-center">
-				<p><a href="<?php echo $post->guid; ?>"
+				<p><a href="<?php echo $permalink; ?>"
 				      class="btn btn-danger btn-md font-roboto mt-lg mb-lg"><strong>Participe do debate!</strong></a>
 				</p>
 			</div>
@@ -90,7 +90,7 @@ class CommentWidgetFront extends WP_Widget {
 		wp_localize_script( 'last-comments-debate', 'commentFrontParams',
 			array(
 				'post_id'  => $post->ID,
-				'post_url' => $post->guid,
+				'post_url' => $permalink,
 				'nonce'    => wp_create_nonce( 'side_comments_last_comments_nonce' ),
 				'delay'    => $instance['delay']
 			) );
