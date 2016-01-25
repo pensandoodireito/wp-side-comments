@@ -63,6 +63,7 @@
   box-sizing: border-box;
   padding: 15px 50px 15px 15px;
   margin: 25px 0;
+  cursor: pointer;
   &:hover {
     background-color: #f2f2f2;
     -webkit-box-shadow: 3px 5px 15px -1px rgba(0, 0, 0, 0.3);
@@ -119,8 +120,8 @@
     right: 0;
     margin-top: 50%;
     cursor: pointer;
-    width: 20px;
-    height: 18px;
+    width: 25px;
+    height: 25px;
     background: #cacaca;
     border-radius: 2px;
     text-decoration: none;
@@ -129,11 +130,11 @@
       display: none;
       content: "+";
       position: absolute;
-      width: 20px;
-      height: 18px;
+      width: 25px;
+      height: 25px;
       line-height: 16px;
-      font-size: 12px;
-      color: #939393;
+      font-size: 14px;
+      color: #2980B9;
       text-align: center;
     }
   }
@@ -159,6 +160,7 @@
     -moz-box-shadow: 3px 5px 15px -1px rgba(0, 0, 0, 0.51);
     box-shadow: 3px 5px 15px -1px rgba(0, 0, 0, 0.51);
     background-color: #fff;
+    cursor: auto;
     .comments-header {
       margin: 0;
       padding: 0;
@@ -245,9 +247,15 @@
     width: 20px;
     height: 18px;
     line-height: 16px;
-    font-size: 14px;
-    color: #ffffff;
+    font-size: 25px;
+    color: #2980B9;
     text-align: center;
+    font-weight: 700;
+    left: 3px;
+    top: 5px;
+    :hover {
+      color: #fff;
+    }
   }
   .marker:after {
     content: "";
@@ -259,9 +267,11 @@
     border-width: 7px 8px 0 0;
     border-style: solid;
     border-color: #cacaca transparent;
+
   }
   .marker:hover {
     background: #4faf62;
+    color: #fff;
   }
   .author-name {
     font-size: 15px;
@@ -296,7 +306,6 @@
 }
 
 .side-comment.has-comments {
-  .marker,
   ul.comments {
     display: block;
   }
@@ -309,6 +318,8 @@
   .marker span {
     display: block;
     color: #fff;
+    margin-top: 5px;
+    font-weight: 700;
   }
   .add-comment.hide {
     display: none;
@@ -318,6 +329,9 @@
   }
   .comment-form.active {
     display: block;
+  }
+  + .active .marker {
+    display: none;
   }
 }
 
