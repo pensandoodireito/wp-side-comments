@@ -508,30 +508,34 @@ class CTLT_WP_Side_Comments {
 	 */
 	public function addSideCommentsClassesToContent( $content ) {
 
-		if ( $this->get_current_post_type() == "texto-em-debate" && $content ) {
-			$content = str_replace( "\\\"", '"', $content );
+        if ($this->get_current_post_type() == "texto-em-debate" && $content) {
+            $content = str_replace("\\\"", '"', $content);
 
-			$dom = new simple_html_dom( $content );
+            $dom = new simple_html_dom($content);
 
-			$elements = $dom->find( 'p.commentable-section' );
+            $commentableElements = $dom->find('.commentable-section');
 
-			foreach ( $elements as $key => $element ) {
-				if ( $element->hasAttribute( 'id' ) ) {
-					$this->findCurrentSectionId( $element );
-				}
-			}
+            foreach ($commentableElements as $key => $element) {
+                if ($element->tag != 'p') {
+                    $element->class = str_replace("commentable-section", "", $element->class);
+                    $element->removeAttribute('data-section-id');
+                } else if ($element->hasAttribute('id')) {
+                    $this->findCurrentSectionId($element);
+                }
+            }
 
-			foreach ( $elements as $element ) {
-				if ( ! $element->hasAttribute( 'id' ) || ! $element->hasAttribute( 'data-section-id' ) || $element->getAttribute( 'data-section-id' ) == 0 ) {
-					self::$currentSectionID ++;
-					$element->setAttribute( 'class', 'commentable-section' );
-					$element->setAttribute( 'data-section-id', self::$currentSectionID );
-					$element->setAttribute( 'id', 'commentable-section-' . self::$currentSectionID );
-				}
-			}
+            $paragraphs = $dom->find('p.commentable-section');
 
-			return $dom->save();
-		}
+            foreach ($paragraphs as $element) {
+                if (!$element->hasAttribute('id') || !$element->hasAttribute('data-section-id') || $element->getAttribute('data-section-id') == 0) {
+                    self::$currentSectionID++;
+                    $element->setAttribute('class', 'commentable-section');
+                    $element->setAttribute('data-section-id', self::$currentSectionID);
+                    $element->setAttribute('id', 'commentable-section-' . self::$currentSectionID);
+                }
+            }
+            return $dom->save();
+        }
 
 		return $content;
 	}/* getCurrentUserDetails() */
