@@ -11,7 +11,9 @@
 require_once CTLT_WP_SIDE_COMMENTS_PLUGIN_PATH . 'classes/class-side-comments-walker.php';
 
 //includes required classes for html parsing
-//require_once CTLT_WP_SIDE_COMMENTS_PLUGIN_PATH . 'classes/simple_html_dom.php';
+if ( ! class_exists( 'simple_html_dom_node' ) ) {
+	require_once CTLT_WP_SIDE_COMMENTS_PLUGIN_PATH . 'classes/simple_html_dom.php';
+}
 
 //includes required classes for comment voting
 require_once CTLT_WP_SIDE_COMMENTS_PLUGIN_PATH . 'classes/class-visitor.php';
@@ -115,7 +117,7 @@ class CTLT_WP_Side_Comments {
 
 	}/* wp_enqueue_scripts__loadScriptsAndStyles() */
 
-/**
+	/**
 	 * Method to determine if we're on the right place to load our scripts/styles and do our bits and pieces
 	 * basically, not admin, on a singular post/page and comments are open
 	 *
@@ -188,7 +190,7 @@ class CTLT_WP_Side_Comments {
 		wp_localize_script( 'wp-side-comments-script', 'commentsData', $data );
 	}
 
-/**
+	/**
 	 * side-comments.js requires data to be passed to the JS. This method gathers the information
 	 * which is then passed to wp_localize_script(). We need information about the user and the comments
 	 * for the page we're looking at
@@ -236,7 +238,7 @@ class CTLT_WP_Side_Comments {
 
 	}
 
-/**
+	/**
 	 * Get data for a single post's comments.
 	 * When data is saved, the section is saved as comment meta (key = 'section' and value = integer of the section)
 	 *
@@ -371,7 +373,7 @@ class CTLT_WP_Side_Comments {
 		return $display;
 	}
 
-/**
+	/**
 	 * Get data about the current user that we will need in side-comments js
 	 *
 	 * @since 0.1
@@ -393,7 +395,7 @@ class CTLT_WP_Side_Comments {
 
 	}
 
-/**
+	/**
 	 * Get data about a specified user ID
 	 *
 	 * @since 0.1
@@ -432,7 +434,7 @@ class CTLT_WP_Side_Comments {
 
 	}
 
-/**
+	/**
 	 * Default user details (Temp method)
 	 *
 	 *
@@ -457,7 +459,7 @@ class CTLT_WP_Side_Comments {
 
 	}
 
-		private function getCommentTemplate() {
+	private function getCommentTemplate() {
 		return $this->WPSideCommentsAdmin->getCurrentCommentTemplate();
 	}/* getCommentsData() */
 
@@ -600,7 +602,7 @@ class CTLT_WP_Side_Comments {
 		return $content;
 	}/* json_get_avatar_url() */
 
-/**
+	/**
 	 * AJAX handler for when someone is logged in and trying to make a comment
 	 *
 	 * @since 0.1
@@ -701,7 +703,7 @@ class CTLT_WP_Side_Comments {
 
 	}/* wp_ajax_add_side_comment__AJAXHandler() */
 
-		private function checkInteractionAllowed() {
+	private function checkInteractionAllowed() {
 		if ( ! is_user_logged_in() && ! $this->WPSideCommentsAdmin->isGuestInteractionAllowed() ) {
 			wp_send_json_error( array(
 				'error_message' => __( 'Você precisa estar logado para executar esta ação.', 'wp-side-comments' )
@@ -767,7 +769,7 @@ class CTLT_WP_Side_Comments {
 
 	}/* weAreOnAValidScreen() */
 
-/**
+	/**
 	 * Remove side-comments from the linear-comments display - currently for the hybrid comments args
 	 *
 	 *
