@@ -80,7 +80,7 @@ class CommentWidgetFront extends WP_Widget {
 		</script>
 		<?php
 		echo $args['after_widget'];
-		add_action( 'wp_footer', 'last_comment_init_script' );
+
 		wp_enqueue_script( 'backbone' );
 		wp_register_script( 'jquery-sort-elements', CTLT_WP_SIDE_COMMENTS_PLUGIN_URL . 'includes/js/jquery.sortElements.js', array(
 			'backbone',
