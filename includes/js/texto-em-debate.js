@@ -155,7 +155,18 @@ jQuery("document").ready(function ($) {
             return false;
         });
     }
-
     //Chama o back to login
     back_to_login($);
+
+    function expandir_menu() {
+       /* $('.expander-menu-top').live('click', function () {
+            $('.menu-top-content').slideToggle();
+        });*/
+        $('.expander-menu-top').click(function() {
+            $('.menu-top-content').slideToggle(400);
+            //$(this).text($(this).text() == 'Mostrar menu' ? 'Esconder menu' : 'Mostrar menu'); // <- HERE
+            return false;
+        });
+    }
+    expandir_menu($);
 });

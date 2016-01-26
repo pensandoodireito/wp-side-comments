@@ -4,7 +4,10 @@
 .menu-topo-mc {
   box-shadow: 0 0 7px 0 rgba(0, 0, 0, 0.3);
   background-color: #fff;
-  padding: 0 0 15px 0;
+  -webkit-transition: all 1s linear;
+  -moz-transition: all 1s linear;
+  -o-transition: all 1s linear;
+  transition: all 1s linear;
 
   span.clear-input-btn {
     position: absolute;
@@ -14,6 +17,20 @@
     z-index: 3;
     cursor: pointer;
   }
+  .menu-top-content{
+    padding-bottom: 15px;
+  }
+  @media (max-width: 750px), (max-height:750px ) {
+    .menu-top-content{
+      display: none;
+    }
+  }
+  .expander-menu-top{
+    width: 100%;
+    border-radius: 0;
+    //background-color: #e6e6e6;
+    border-width: 0;
+  }
 }
 
 .fixed-top-mc {
@@ -22,6 +39,13 @@
   top: 0;
   left: 0;
   width: 100%;
+  .menu-top-content{
+    display: none;
+    transition: opacity 0.4s ease-in;
+    -ms-transition: opacity 0.4s ease-in;
+    -moz-transition: opacity 0.4s ease-in;
+    -webkit-transition: opacity 0.4s ease-in;
+  }
 }
 
 // css da busca
