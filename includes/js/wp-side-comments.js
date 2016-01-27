@@ -177,17 +177,6 @@ jQuery(document).ready(function ($) {
         // });
 
     });
-// Adds .active to the parent p.commentable-section of .marker when clicked
-
-    $(".marker", ".side-comment").on('click', function (e) {
-        if (!$(this).parent().hasClass('active')) {
-            var parent = $(this).parent().parent('p.commentable-section');
-            parent.addClass('active');
-
-        } else {
-            $(this).parent().parent('p.commentable-section').removeClass('active');
-        }
-    });
 
     //Removes .active from p.commentable-section when the cursor is click anywhere else but .commment-wrapper. Used to mimic same nature of side comments
     $('#content, html').on('click', function (e) {
@@ -212,19 +201,22 @@ jQuery(document).ready(function ($) {
         var target = $(e.target);
         var sectionSelected = target.parents(".commentable-section.active");
         var menuTopo = $('.menu-topo-mc');
-        var scrollPos = sectionSelected.offset().top;
-        if (menuTopo.hasClass('fixed-top-mc')) {
-            scrollPos -= menuTopo.outerHeight(true);
-        } else {
-            scrollPos -= menuTopo.outerHeight(true) * 2;
+        if (sectionSelected.offset()) {
+            var scrollPos = sectionSelected.offset().top;
+            if (menuTopo.hasClass('fixed-top-mc')) {
+                scrollPos -= menuTopo.outerHeight(true);
+            } else {
+                scrollPos -= menuTopo.outerHeight(true) * 2;
+            }
+            $('body,html').animate({
+                scrollTop: scrollPos
+            }, 500);
         }
-        $('body,html').animate({
-            scrollTop: scrollPos
-        }, 500);
     });
 
     //Trigger close events when close btn is clicked or touched
     $(".comments-header div.close-btn").on('click touchstart', function (e) {
+        e.preventDefault();
         document.body.click();
     });
 
