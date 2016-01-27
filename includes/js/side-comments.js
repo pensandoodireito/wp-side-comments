@@ -625,7 +625,10 @@ require.register("side-comments/js/section.js", function (exports, require, modu
 
     Section.prototype.showComment = function (event) {
         //console.log('clicked: showComment');
+        if (event.type == "touchstart") return; //prevent opening comments box when swipeing screen
+
         event.preventDefault();
+
         var target = $(event.target);
         var context = $(target.context);
         var showCondition = target.parents('.commentable-section').length > 0
