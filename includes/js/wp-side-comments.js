@@ -201,7 +201,7 @@ jQuery(document).ready(function ($) {
         ) {
             return; // click happened within the dialog, do nothing here
         } else { // click was outside the dialog, so close it
-            $(".commentable-section").removeClass("active");
+            document.body.click();
             // Return to page scroll
             $('body').unbind('mousewheel');
         }
@@ -223,8 +223,12 @@ jQuery(document).ready(function ($) {
         }, 500);
     });
 
-    // Stops page from scrolling when mouse is hovering .comments-wrapper .comments
+    //Trigger close events when close btn is clicked or touched
+    $(".comments-header div.close-btn").on('click touchstart', function (e) {
+        document.body.click();
+    });
 
+    // Stops page from scrolling when mouse is hovering .comments-wrapper .comments
     if ($(window).width() > 767) {
         $('.comments-wrapper .comments-estructure').bind('mousewheel DOMMouseScroll', function (e) {
             var e0 = e.originalEvent,
@@ -239,7 +243,7 @@ jQuery(document).ready(function ($) {
     var voteButtonClicked = false;
 
     // catch the upvote/downvote action
-    $('div.commentable-container').on('click', 'a.vote-btn', function (e) {
+    $('div.commentable-container').on('click touchstart', 'a.vote-btn', function (e) {
         e.preventDefault();
         var parent = $(this).parents('.comment-weight-container');
         var value = 0;
