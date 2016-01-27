@@ -1,0 +1,54 @@
+<div class="side-comment <%= sectionClasses %>">
+    <a href="#" class="marker"> <span><%= comments.length %></span> </a>
+
+    <div class="comments-wrapper">
+        <div class="comments-header clearfix">
+            <div class="pull-left">
+                <h5 class="font-roboto titulo-comments">
+                    <strong>Comentários deste trecho</strong>
+                </h5>
+            </div>
+            <div class="pull-right close-btn">
+                <i class="fa fa-times"></i>
+            </div>
+        </div>
+        <div class="clearfix comments-estructure">
+            <ul class="comments" data-root-id="0">
+                <% _.each(comments, function( comment ){ %>
+                <%= _.template(commentTemplate, {
+                comment: comment,
+                currentUser: currentUser,
+                allowUserInteraction: allowUserInteraction })
+                %>
+                <% }) %>
+            </ul>
+        </div>
+        <% if (!allowUserInteraction){ %>
+        <div class="user-interaction-disabled">
+            As interações (comentários e votação) com este texto estão fechadas ou já se encerraram.
+        </div>
+        <% } else if (currentUser){ %>
+        <a href="#" class="add-comment mt-sm btn btn-success btn-md" data-parent="0" data-comment="">
+            Deixe seu comentário
+        </a>
+
+        <div class="comment-form" data-parent="0" data-comment="">
+            <p class="author-name"> <%= currentUser.name %> </p>
+
+            <div class="comment-box" contenteditable="true" data-placeholder-content="Deixe seu comentário">
+            </div>
+            <div class="mt-sm">
+                <a href="#" class="action-link post btn btn-default text-blue" data-parent="0"
+                   data-comment="">Enviar</a>
+                <a href="#" class="action-link cancel btn btn-default red" data-parent="0" data-comment="">Cancelar</a>
+            </div>
+        </div>
+        <% } else { %>
+        <div class="back-to-login">
+            <a href="#" class="add-comment mt-sm btn btn-info btn-md">
+                Para participar, você precisa estar logado
+            </a>
+        </div>
+        <% } %>
+    </div>
+</div>
