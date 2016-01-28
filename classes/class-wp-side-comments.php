@@ -508,34 +508,35 @@ class CTLT_WP_Side_Comments {
 	 */
 	public function addSideCommentsClassesToContent( $content ) {
 
-        if ($this->get_current_post_type() == "texto-em-debate" && $content) {
-            $content = str_replace("\\\"", '"', $content);
+		if ( $this->get_current_post_type() == "texto-em-debate" && $content ) {
+			$content = str_replace( "\\\"", '"', $content );
 
-            $dom = new simple_html_dom($content);
+			$dom = new simple_html_dom( $content );
 
-            $commentableElements = $dom->find('.commentable-section');
+			$commentableElements = $dom->find( '.commentable-section' );
 
-            foreach ($commentableElements as $key => $element) {
-                if ($element->tag != 'p') {
-                    $element->class = str_replace("commentable-section", "", $element->class);
-                    $element->removeAttribute('data-section-id');
-                } else if ($element->hasAttribute('id')) {
-                    $this->findCurrentSectionId($element);
-                }
-            }
+			foreach ( $commentableElements as $key => $element ) {
+				if ( $element->tag != 'p' ) {
+					$element->class = str_replace( "commentable-section", "", $element->class );
+					$element->removeAttribute( 'data-section-id' );
+				} else if ( $element->hasAttribute( 'id' ) ) {
+					$this->findCurrentSectionId( $element );
+				}
+			}
 
-            $paragraphs = $dom->find('p.commentable-section');
+			$paragraphs = $dom->find( 'p.commentable-section' );
 
-            foreach ($paragraphs as $element) {
-                if (!$element->hasAttribute('id') || !$element->hasAttribute('data-section-id') || $element->getAttribute('data-section-id') == 0) {
-                    self::$currentSectionID++;
-                    $element->setAttribute('class', 'commentable-section');
-                    $element->setAttribute('data-section-id', self::$currentSectionID);
-                    $element->setAttribute('id', 'commentable-section-' . self::$currentSectionID);
-                }
-            }
-            return $dom->save();
-        }
+			foreach ( $paragraphs as $element ) {
+				if ( ! $element->hasAttribute( 'id' ) || ! $element->hasAttribute( 'data-section-id' ) || $element->getAttribute( 'data-section-id' ) == 0 ) {
+					self::$currentSectionID ++;
+					$element->setAttribute( 'class', 'commentable-section' );
+					$element->setAttribute( 'data-section-id', self::$currentSectionID );
+					$element->setAttribute( 'id', 'commentable-section-' . self::$currentSectionID );
+				}
+			}
+
+			return $dom->save();
+		}
 
 		return $content;
 	}/* getCurrentUserDetails() */
@@ -1074,9 +1075,10 @@ class CTLT_WP_Side_Comments {
 	}
 
 	private function findLastCommentedSections( $postID, $numberOfSections = 3 ) {
+		$meta_key = 'side-comment-section';
 		$args     = array(
 			'post_id'  => $postID,
-			'meta_key' => 'side-comment-section',
+			'meta_key' => $meta_key,
 			'number'   => 1
 		);
 		$sections = array();
@@ -1084,7 +1086,7 @@ class CTLT_WP_Side_Comments {
 		for ( ; $numberOfSections > 0; $numberOfSections -- ) {
 			if ( $sections ) {
 				$args['meta_query'] = $qryArgs = array(
-					'key'     => 'side-comment-section',
+					'key'     => $meta_key,
 					'value'   => $sections,
 					'compare' => 'NOT IN'
 				);
@@ -1092,7 +1094,7 @@ class CTLT_WP_Side_Comments {
 
 			$comments = get_comments( $args );
 			if ( $comments ) {
-				$sections[] = $comments[0]->meta_value;
+				$sections[] = get_comment_meta( $comments[0]->comment_ID, $meta_key, true );;
 			}
 		}
 
